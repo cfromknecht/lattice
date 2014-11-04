@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glload", "glload\glload.vcxproj", "{2F92BB33-CD8E-600F-63D4-04371BFA2188}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glimg", "glimg\glimg.vcxproj", "{03005AA9-09B5-FF15-FE85-66454E2E0CD2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "freeglut", "freeglut\freeglut.vcxproj", "{15A60E83-230E-FE43-BD43-5F0333F18BCC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glutil", "glutil\glutil.vcxproj", "{F960E4ED-D5A6-F180-C1BF-637266CEA1B1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glmesh", "glmesh\glmesh.vcxproj", "{2089A545-2503-CACF-A5AE-F6546345591F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2F92BB33-CD8E-600F-63D4-04371BFA2188}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2F92BB33-CD8E-600F-63D4-04371BFA2188}.Debug|Win32.Build.0 = Debug|Win32
+		{2F92BB33-CD8E-600F-63D4-04371BFA2188}.Release|Win32.ActiveCfg = Release|Win32
+		{2F92BB33-CD8E-600F-63D4-04371BFA2188}.Release|Win32.Build.0 = Release|Win32
+		{03005AA9-09B5-FF15-FE85-66454E2E0CD2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{03005AA9-09B5-FF15-FE85-66454E2E0CD2}.Debug|Win32.Build.0 = Debug|Win32
+		{03005AA9-09B5-FF15-FE85-66454E2E0CD2}.Release|Win32.ActiveCfg = Release|Win32
+		{03005AA9-09B5-FF15-FE85-66454E2E0CD2}.Release|Win32.Build.0 = Release|Win32
+		{15A60E83-230E-FE43-BD43-5F0333F18BCC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{15A60E83-230E-FE43-BD43-5F0333F18BCC}.Debug|Win32.Build.0 = Debug|Win32
+		{15A60E83-230E-FE43-BD43-5F0333F18BCC}.Release|Win32.ActiveCfg = Release|Win32
+		{15A60E83-230E-FE43-BD43-5F0333F18BCC}.Release|Win32.Build.0 = Release|Win32
+		{F960E4ED-D5A6-F180-C1BF-637266CEA1B1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F960E4ED-D5A6-F180-C1BF-637266CEA1B1}.Debug|Win32.Build.0 = Debug|Win32
+		{F960E4ED-D5A6-F180-C1BF-637266CEA1B1}.Release|Win32.ActiveCfg = Release|Win32
+		{F960E4ED-D5A6-F180-C1BF-637266CEA1B1}.Release|Win32.Build.0 = Release|Win32
+		{2089A545-2503-CACF-A5AE-F6546345591F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2089A545-2503-CACF-A5AE-F6546345591F}.Debug|Win32.Build.0 = Debug|Win32
+		{2089A545-2503-CACF-A5AE-F6546345591F}.Release|Win32.ActiveCfg = Release|Win32
+		{2089A545-2503-CACF-A5AE-F6546345591F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
