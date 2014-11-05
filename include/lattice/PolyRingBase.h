@@ -1,54 +1,90 @@
 #ifndef _POLY_RING_BASE_
 #define _POLY_RING_BASE_
 
+#include <lattice/PolyRingI.h>
+
 #include <cstdlib>
 
 namespace lattice {
 
-  class PolyRingBase {
-    private:
-      size_t _degree;
-      size_t _k;
-      size_t _modulus;
+  template< class T >
+    class PolyRingBase {
+    public:
+      T& _ringImpl;
 
       PolyRingBase() = delete;
-      
-      // arithmetic operator stubs
-      virtual void assign( const PolyRingBase& other ) = 0;
-      virtual void addAssign( const PolyRingBase& other ) = 0;
-      virtual void subtractAssign( const PolyRingBase& other ) = 0;
-      virtual void multiplyAssign( const PolyRingBase& other ) = 0;
+      PolyRingBase( size_t nn, size_t kk ) : _ringImpl(*new T{nn, kk}) {}
+      PolyRingBase( const PolyRingBase& pr ) : _ringImpl(pr._ringImpl) {}
+      ~PolyRingBase() {}
 
-    protected:
-      inline void assignParameters( const PolyRingBase& other );
+      PolyRingBase& operator=( const PolyRingBase& rhs );
+      PolyRingBase& operator+=( const PolyRingBase& rhs );
+      PolyRingBase& operator-=( const PolyRingBase& rhs );
+      PolyRingBase& operator*=( const PolyRingBase& rhs );
 
-    public:
-      PolyRingBase( size_t nn, size_t kk ) : _degree{nn}, _k{kk}, 
-        _modulus{size_t(1) << kk} {}
-      PolyRingBase( const PolyRingBase& other) : _degree{other._degree}, 
-        _k{other._k}, _modulus{other._modulus} {}
-      virtual ~PolyRingBase() {}
+      PolyRingBase operator+( const PolyRingBase& rhs );
+      PolyRingBase operator-( const PolyRingBase& rhs );
+      PolyRingBase operator*( const PolyRingBase& rhs );
 
-      // equality operators
-      virtual bool operator==( const PolyRingBase& other ) = 0;
-      virtual bool operator!=( const PolyRingBase& other ) = 0;
+      void uniformInit();
+      void ternaryInit();
+    };
 
-      // member functions
-      inline const size_t& degree() const { return _degree; }
-      inline const size_t& k() const { return _k; }
-      inline const size_t& modulus() const { return _modulus; }
+  template< class T >
+    PolyRingBase<T>& PolyRingBase<T>::operator=( const PolyRingBase<T>& rhs ) {
+      if ( this != &rhs )
+        _ringImpl.assign( T{rhs._ringImpl} );
+      return *this;
+    }
 
-      virtual void blankInit() = 0;
-      virtual void randomInit() = 0;
-      virtual void ternaryInit() = 0;
-  };
+  template< class T >
+    PolyRingBase<T>& PolyRingBase<T>::operator+=( const PolyRingBase<T>& rhs ) {
+      _ringImpl.addAssign( rhs._ringImpl );
+      return *this;
+    }
 
+  template< class T >
+    PolyRingBase<T>& PolyRingBase<T>::operator-=( const PolyRingBase<T>& rhs ) {
+      _ringImpl.subtractAssign( rhs._ringImpl );
+      return *this;
+    }
 
-  inline void PolyRingBase::assignParameters( const PolyRingBase& other ) {
-    this->_degree = other._degree;
-    this->_k = other._k;
-    this->_modulus = other._modulus;
-  }
+  template< class T >
+    PolyRingBase<T>& PolyRingBase<T>::operator*=( const PolyRingBase<T>& rhs ) {
+      _ringImpl.multiplyAssign( rhs._ringImpl );
+      return *this;
+    }
+
+  template< class T >
+    PolyRingBase<T> PolyRingBase<T>::operator+( const PolyRingBase<T>& rhs ) {
+      auto lhs = new PolyRingBase<T>{*this};
+      *lhs += rhs;
+      return *lhs;
+    }
+
+  template< class T >
+    PolyRingBase<T> PolyRingBase<T>::operator-( const PolyRingBase<T>& rhs ) {
+      auto lhs = new PolyRingBase<T>{*this};
+      *lhs -= rhs;
+      return *lhs;
+    }
+
+  template< class T >
+    PolyRingBase<T> PolyRingBase<T>::operator*( const PolyRingBase<T>& rhs ) {
+      auto lhs = new PolyRingBase<T>{*this};
+      *lhs *= rhs;
+      return *lhs;
+    }
+
+  template< class T >
+    void PolyRingBase<T>::uniformInit() {
+      _ringImpl.uniformInit();
+    }
+
+  template< class T >
+    void PolyRingBase<T>::ternaryInit() {
+      _ringImpl.ternaryInit();
+    }
 
 }
 
