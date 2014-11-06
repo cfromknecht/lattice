@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sys/time.h>
 
-const size_t ITERATIONS = 1000;
+const size_t ITERATIONS = 10000;
 const size_t SPREAD = 100;
 
 int main() {
@@ -23,8 +23,9 @@ int main() {
 
   struct timeval t1, t2;
   gettimeofday( &t1, 0 );
+#pragma omp parallel for
   for ( size_t i = 0; i < ITERATIONS; ++i )
-    ring *= ring2;
+    ring * ring2;
   gettimeofday( &t2, 0 );
   
   std::cout << "*=: " << 
@@ -32,8 +33,9 @@ int main() {
     << std::endl;
 
   gettimeofday( &t1, 0 );
+#pragma omp parallel for
   for ( size_t i = 0; i < ITERATIONS; ++i )
-    ring * ring2;
+    ring *= ring2;
   gettimeofday( &t2, 0 );
 
   std::cout << "*: " << 

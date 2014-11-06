@@ -1,4 +1,4 @@
-all:
+demo:
 
 PROJ_NAME := lattice
 
@@ -23,9 +23,7 @@ MKDIR := mkdir -p
 INCLUDE_FLAGS := 	-I$(INSTALL_DIR)/include \
 									-I$(DEV_DIR)/include \
 									-I$(GTEST_DIR)/include \
-									-I$(GTEST_DIR) \
-#									-I/usr/local/Cellar/include/glew/1.10.0/include \
-									-I/usr/local/Cellar/include/GLFW
+									-I$(GTEST_DIR)
 
 FLAGS := -m64 -Wall -Wextra -Wshadow -Werror -pedantic
 CXXFLAGS := -std=c++11 -Weffc++ $(FLAGS)
@@ -33,11 +31,9 @@ LDFLAGS := 	-L$(INSTALL_DIR)/lib \
 						-lm \
 						-lpthread \
 						-lgmp \
-						-lflint \
-#						-lssl \
-						-lcrypto
+						-lflint
 
-DEBUG_FLAGS := -g -O2 -D _DEBUG
+DEBUG_FLAGS := -g -D _DEBUG
 RELEASE_FLAGS := -O2 -D NDEBUG
 
 # cleanup

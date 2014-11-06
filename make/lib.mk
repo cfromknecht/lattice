@@ -8,7 +8,6 @@ OBJECTS_PROJ := \
 	$(BUILD_DIR_PROJ)/DiscreteGaussianSampler.o \
 	$(BUILD_DIR_PROJ)/Constants.o \
 	$(BUILD_DIR_PROJ)/PolyRingBase.o \
-	$(BUILD_DIR_PROJ)/PolyRingI.o \
 	$(BUILD_DIR_PROJ)/PolyRingFLINT.o
 
 $(OBJECTS_PROJ) : | $(INSTALL_DIR)/include/$(PROJ_NAME) \

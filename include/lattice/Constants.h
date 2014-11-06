@@ -6,7 +6,7 @@
 
 namespace lattice {
 
-  typedef PolyRingBase<PolyRingFLINT> PolyRing;
+  typedef PolyRingFLINT PolyRing;
   
 }
 
