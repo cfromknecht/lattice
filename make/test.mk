@@ -9,6 +9,8 @@ $(TARGET_PROJ_TEST) : LDFLAGS += --coverage $(INSTALL_DIR)/lib/lib$(PROJ_NAME).a
 OBJECTS_PROJ_TEST := \
 	$(BUILD_DIR_PROJ_TEST)/gtest-all.o \
 	$(BUILD_DIR_PROJ_TEST)/$(PROJ_NAME)-test.o \
+	$(BUILD_DIR_PROJ_TEST)/PolyRingTest.o \
+	$(BUILD_DIR_PROJ_TEST)/PolyRingMatrixTest.o
 
 $(OBJECTS_PROJ_TEST) : CXXFLAGS += -fprofile-arcs -ftest-coverage
 

@@ -1,5 +1,4 @@
-#include <lattice/DiscreteGaussianSampler.h>
-#include <lattice/Constants.h>
+#include <lattice/PolyRingMatrix.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -11,36 +10,29 @@ const size_t SPREAD = 100;
 int main() {
   srand( time( NULL ) );
 
-  auto sampler = lattice::DiscreteGaussianSampler{SPREAD, 63, 1024};
-  for ( size_t i = 0; i < ITERATIONS; ++i )
-    sampler.sample();
-
   // Polynomial Multiplication
-  auto ring = lattice::PolyRing{256, 14};
-  auto ring2 = lattice::PolyRing{256, 14};
+  auto ring = lattice::PolyRingMatrix{1, 8, 256, 8};
+  auto ring2 = lattice::PolyRingMatrix{8, 8, 256, 8};
+  auto ring3 = lattice::PolyRingMatrix{1, 8, 256, 8};
   ring.uniformInit();
   ring2.uniformInit();
 
   struct timeval t1, t2;
   gettimeofday( &t1, 0 );
-#pragma omp parallel for
-  for ( size_t i = 0; i < ITERATIONS; ++i )
-    ring * ring2;
+  ring * ring2;
   gettimeofday( &t2, 0 );
-  
-  std::cout << "*=: " << 
-    double(t2.tv_usec - t1.tv_usec + 1000000*(t2.tv_sec - t1.tv_sec))/double(ITERATIONS)
-    << std::endl;
+
+  std::cout << "time: " << (t2.tv_usec - t1.tv_usec 
+      + 1000000*(t2.tv_sec - t1.tv_sec))
+      << std::endl;
 
   gettimeofday( &t1, 0 );
-#pragma omp parallel for
-  for ( size_t i = 0; i < ITERATIONS; ++i )
-    ring *= ring2;
+  ring += ring3;
   gettimeofday( &t2, 0 );
 
-  std::cout << "*: " << 
-    double(t2.tv_usec - t1.tv_usec + 1000000*(t2.tv_sec - t1.tv_sec))/double(ITERATIONS)
-    << std::endl;
+  std::cout << "time: " << (t2.tv_usec - t1.tv_usec 
+      + 1000000*(t2.tv_sec - t1.tv_sec))
+      << std::endl;
 
   return 0;
 }

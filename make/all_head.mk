@@ -30,8 +30,10 @@ CXXFLAGS := -std=c++11 -Weffc++ $(FLAGS)
 LDFLAGS := 	-L$(INSTALL_DIR)/lib \
 						-lm \
 						-lpthread \
-						-lgmp \
-						-lflint
+						-lflint \
+						-lmpfr \
+						-lgmp
+
 
 DEBUG_FLAGS := -g -D _DEBUG
 RELEASE_FLAGS := -O2 -D NDEBUG

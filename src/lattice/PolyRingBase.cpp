@@ -3,7 +3,7 @@
 namespace lattice {
   
   /**
-   * See lattice/PolyRingBase.h
+   * see lattice/PolyRingBase.h for implmentation
    */
   
 }

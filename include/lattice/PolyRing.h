@@ -1,5 +1,5 @@
-#ifndef _LATTICE_CONSTANTS_
-#define _LATTICE_CONSTANTS_
+#ifndef _POLY_RING_
+#define _POLY_RING_
 
 #include <lattice/PolyRingFLINT.h>
 #include <lattice/PolyRingBase.h>
