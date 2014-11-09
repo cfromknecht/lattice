@@ -1,4 +1,4 @@
-#include <lattice/PolyRing.h>
+#include <lattice/PolyRing.hpp>
 #include <gtest/gtest.h>
 
 #include <cstdlib>
