@@ -84,7 +84,10 @@ namespace lattice {
       _polys[i].uniformInit();
   }
 
-  void PolyRingMatrix::ternaryInit() {}
+  void PolyRingMatrix::ternaryInit() {
+    for ( size_t i = 0; i < _n*_m; ++i )
+      _polys[i].ternaryInit();
+  }
 
 }
 
