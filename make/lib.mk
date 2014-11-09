@@ -1,4 +1,5 @@
-vpath %.cpp $(DEV_DIR)/src/lattice
+vpath %.cpp $(DEV_DIR)/src/$(PROJ_NAME)
+vpath %.hpp $(DEV_DIR)/include/$(PROJ_NAME)
 
 TARGET_PROJ := $(INSTALL_DIR)/lib/lib$(PROJ_NAME).a
 
@@ -8,8 +9,8 @@ OBJECTS_PROJ := \
 	$(BUILD_DIR_PROJ)/DiscreteGaussianSampler.o \
 	$(BUILD_DIR_PROJ)/PolyRing.o \
 	$(BUILD_DIR_PROJ)/PolyRingBase.o \
-	$(BUILD_DIR_PROJ)/PolyRingMatrix.o \
-	$(BUILD_DIR_PROJ)/PolyRingFLINT.o
+	$(BUILD_DIR_PROJ)/PolyRingFLINT.o \
+	$(BUILD_DIR_PROJ)/PolyRingMatrix.o
 
 $(OBJECTS_PROJ) : | $(INSTALL_DIR)/include/$(PROJ_NAME) \
 										$(INSTALL_DIR)/bin/resources/$(PROJ_NAME) \

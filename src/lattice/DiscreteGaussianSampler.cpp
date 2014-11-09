@@ -1,6 +1,7 @@
 #include <lattice/DiscreteGaussianSampler.h>
 
 #include <bitset>
+#include <cstdlib>
 #include <iostream>
 
 namespace lattice {

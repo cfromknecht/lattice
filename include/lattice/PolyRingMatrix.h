@@ -1,7 +1,7 @@
 #ifndef _POLY_RING_MATRIX_
 #define _POLY_RING_MATRIX_
 
-#include <lattice/PolyRing.h>
+#include <lattice/PolyRing.hpp>
 
 #include <vector>
 

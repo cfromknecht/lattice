@@ -1,6 +1,6 @@
 vpath %.cpp $(DEV_DIR)/test
 
-TARGET_PROJ_TEST := $(INSTALL_DIR)/test/$(PROJ_NAME)-test.x
+TARGET_PROJ_TEST := $(INSTALL_DIR)/test/$(PROJ_NAME)-test.xx
 BUILD_DIR_PROJ_TEST := $(BUILD_DIR)/$(PROJ_NAME)-test
 
 $(TARGET_PROJ_TEST) : $(INSTALL_DIR)/lib/lib$(PROJ_NAME).a

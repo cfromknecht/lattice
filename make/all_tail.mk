@@ -16,15 +16,17 @@ COMPILE_CXX = $(CXX) -c -o $@ -fopenmp $< $(INCLUDE_FLAGS) $(CXXFLAGS) $(DEBUG_F
 release : COMPILE_CXX = $(CXX) -c -o $@ -fopenmp $< $(INCLUDE_FLAGS) $(CXXFLAGS) $(RELEASE_FLAGS)
 release : all
 
-%-test.x : | $(INSTALL_DIR)/test $(INSTALL_DIR)/test/resources
-	$(CXX) -o $@ -fopenmp $^ $(LDFLAGS)
-	$@
-
 %.a : | $(INSTALL_DIR)/lib $(INSTALL_DIR)/include
 	$(AR) rcs $@ $^
 
 %.x : | $(INSTALL_DIR)/bin $(INSTALL_DIR)/bin/resources
+	@echo demo
 	$(CXX) -o $@ -fopenmp $^ $(LDFLAGS)
+
+%-test.xx : | $(INSTALL_DIR)/test $(INSTALL_DIR)/test/resources
+	@echo test
+	$(CXX) -o $@ -fopenmp $^ $(LDFLAGS)
+	$@
 
 $(TARGET_PROJ) : $(OBJECTS_PROJ)
 $(TARGET_PROJ_DEMO) : $(OBJECTS_PROJ_DEMO)
@@ -37,25 +39,40 @@ $(OBJECTS_PROJ_TEST) $(patsubst %.o,%.d, $(OBJECTS_PROJ_TEST)) : | $(BUILD_DIR_P
 OBJECTS := $(sort $(OBJECTS_PROJ) $(OBJECTS_PROJ_DEMO) $(OBJECTS_PROJ_TEST))
 $(OBJECTS) : %.o : %.d
 
+# templates
+$(addsuffix /%.d, $(BUILD_DIRS)) : %.hpp
+	$(SHELL) -ec "$(CXX) -std=c++11 $(INCLUDE_FLAGS) -I$(DEV_DIR)/include -MM $< \
+	| sed 's|$(notdir $*)\.o[ ]*:|$*\.o $@ :|g' > $@; \
+	[ -s $@ ] || $(RM) $@"
+
+# source code
 $(addsuffix /%.d, $(BUILD_DIRS)) : %.cpp
 	$(SHELL) -ec "$(CXX) -std=c++11 $(INCLUDE_FLAGS) -I$(DEV_DIR)/include -MM $< \
 	| sed 's|$(notdir $*)\.o[ ]*:|$*\.o $@ :|g' > $@; \
 	[ -s $@ ] || $(RM) $@"
 
+# gtest-all.cc
 $(addsuffix /%.d, $(BUILD_DIRS)) : %.cc
 	$(SHELL) -ec "$(CXX) -std=c++11 $(INCLUDE_FLAGS) -I$(DEV_DIR)/include -MM $< \
 	| sed 's|$(notdir $*)\.o[ ]*:|$*\.o $@ :|g' > $@; \
 	[ -s $@ ] || $(RM) $@"
 
 $(BUILD_DIR_PROJ)/%.o : %.cpp ; $(COMPILE_CXX)
+$(BUILD_DIR_PROJ)/%.o : %.hpp ; $(COMPILE_CXX)
+
 $(BUILD_DIR_PROJ_DEMO)/%.o : %.cpp ; $(COMPILE_CXX)
+
 $(BUILD_DIR_PROJ_TEST)/%.o : %.cpp ; $(COMPILE_CXX)
 $(BUILD_DIR_PROJ_TEST)/%.o : %.cc ; $(COMPILE_CXX)
 
-clean : 
-	$(RM) -r $(TARGETS) $(BUILD_DIRS) $(ARTIFACTS)
 
+ifneq ($(MAKECMDGOALS), clean)
 -include $(patsubst %.o,%.d,$(OBJECTS))
+endif
+
+clean :
+	$(RM) -rf $(TARGETS) $(BUILD_DIRS) $(ARTIFACTS)
+
 
 $(BUILD_DIRS) $(INSTALL_DIR)/bin \
 							$(INSTALL_DIR)/bin/resources \
