@@ -1,5 +1,4 @@
 #include <lattice/FSM.h>
-#include <lattice/Trapdoor.h>
 
 #include <iostream>
 
@@ -33,8 +32,6 @@ int main() {
     runFSMOnString( fsm, letter );
     letter[0] = size_t(letter[0]) + 1;
   }
-
-  auto trap = lattice::Trapdoor{256, 14};
 
   return 0;
 }

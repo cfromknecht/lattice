@@ -77,7 +77,6 @@ namespace lattice {
     _currentState = _transitions[_currentState].nextStateForSymbol( nextSymbol );
   }
 
-
   /**
    * Checks that the state to add is unique and saves it to the hash table.
    * @param size_t stateID - the ID of the new state
