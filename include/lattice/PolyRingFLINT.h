@@ -1,6 +1,7 @@
 #ifndef _POLY_RING_FLINT_
 #define _POLY_RING_FLINT_
 
+#include <lattice/BernoulliSampler.h>
 #include <lattice/PolyRingBase.hpp>
 
 #include <flint/fmpz_mod_poly.h>

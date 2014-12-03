@@ -1,38 +1,38 @@
-#include <lattice/PolyRingMatrix.h>
+#include <lattice/FSM.h>
+#include <lattice/Trapdoor.h>
 
-#include <cstdlib>
 #include <iostream>
-#include <sys/time.h>
 
-const size_t ITERATIONS = 10000;
-const size_t SPREAD = 100;
+void runFSMOnString( lattice::FSM& fsm, const std::string& input ) {
+  size_t inputLength = input.size();
+  for ( size_t i = 0; i < inputLength; ++i )
+    for ( size_t b = 7; b < 8; --b ) {
+      size_t nextSymbol = (input[i] >> b) & 1;
+      fsm.applyTransition( nextSymbol );
+    }
+  std::cout << "input: " << input <<  " accept: " << fsm.isInAcceptState() << std::endl;
+  fsm.reset();
+}
 
 int main() {
-  srand( time( NULL ) );
+  std::string filename{"fsm-a.in"};
 
-  // Polynomial Multiplication
-  auto ring = lattice::PolyRingMatrix{1, 8, 256, 8};
-  auto ring2 = lattice::PolyRingMatrix{8, 8, 256, 8};
-  auto ring3 = lattice::PolyRingMatrix{1, 8, 256, 8};
-  ring.uniformInit();
-  ring2.uniformInit();
+  auto fsm = lattice::FSM{};
+  auto valid = fsm.buildFSMFromFile( filename );
+  if ( !valid )
+    std::cout << "invalid FSM file" << std::endl;
+  else
+    std::cout << "valid FSM file" << std::endl;
 
-  struct timeval t1, t2;
-  gettimeofday( &t1, 0 );
-  ring * ring2;
-  gettimeofday( &t2, 0 );
+  std::string input{"This sentence has the letter b."};
+  runFSMOnString( fsm, input );
+  std::string letter{"a"};
+  for ( size_t i = 0; i < 26; ++i ) {
+    runFSMOnString( fsm, letter );
+    letter[0] = size_t(letter[0]) + 1;
+  }
 
-  std::cout << "time: " << (t2.tv_usec - t1.tv_usec 
-      + 1000000*(t2.tv_sec - t1.tv_sec))
-      << std::endl;
-
-  gettimeofday( &t1, 0 );
-  ring += ring3;
-  gettimeofday( &t2, 0 );
-
-  std::cout << "time: " << (t2.tv_usec - t1.tv_usec 
-      + 1000000*(t2.tv_sec - t1.tv_sec))
-      << std::endl;
+  auto trap = lattice::Trapdoor{256, 14};
 
   return 0;
 }

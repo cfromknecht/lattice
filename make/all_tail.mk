@@ -71,6 +71,11 @@ endif
 clean :
 	$(RM) -rf $(TARGETS) $(BUILD_DIRS) $(ARTIFACTS)
 
+install: release
+	$(MKDIR) -p /usr/local/lib
+	$(MKDIR) -p /usr/local/include/$(PROJ_NAME)
+	$(CP) $(TARGET_PROJ) /usr/local/lib
+	$(CP) $(DEV_DIR)/include/$(PROJ_NAME)/* /usr/local/include/$(PROJ_NAME)
 
 $(BUILD_DIRS) $(INSTALL_DIR)/bin \
 							$(INSTALL_DIR)/bin/resources \
