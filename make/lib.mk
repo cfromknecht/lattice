@@ -6,7 +6,12 @@ TARGET_PROJ := $(INSTALL_DIR)/lib/lib$(PROJ_NAME).a
 BUILD_DIR_PROJ := $(BUILD_DIR)/$(PROJ_NAME)
 
 OBJECTS_PROJ := \
+	$(BUILD_DIR_PROJ)/BernoulliSampler.o \
 	$(BUILD_DIR_PROJ)/DiscreteGaussianSampler.o \
+	$(BUILD_DIR_PROJ)/FSM.o \
+	$(BUILD_DIR_PROJ)/FSMState.o \
+	$(BUILD_DIR_PROJ)/FSMTransition.o \
+	$(BUILD_DIR_PROJ)/Trapdoor.o \
 	$(BUILD_DIR_PROJ)/PolyRing.o \
 	$(BUILD_DIR_PROJ)/PolyRingBase.o \
 	$(BUILD_DIR_PROJ)/PolyRingFLINT.o \
