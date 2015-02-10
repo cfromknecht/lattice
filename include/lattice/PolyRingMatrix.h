@@ -44,6 +44,8 @@ namespace lattice {
     void ternaryInit(); 
     void ternaryInit( size_t i ); 
 
+    PolyRingMatrix* invertGTrapdoor( const PolyRingMatrix& target ) const;
+
     std::vector<PolyRing>& polys() { return _polys; }
     const std::vector<PolyRing> polys() const { return _polys; }
   };

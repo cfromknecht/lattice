@@ -132,5 +132,19 @@ namespace lattice {
     _polys[i].ternaryInit();
   }
 
+  PolyRingMatrix*
+  PolyRingMatrix::invertGTrapdoor( const PolyRingMatrix& target ) const {
+    if ( target.m() != 1 && _n <= target.n() )
+      throw std::runtime_error{"Not enough equations to solve inversion"};
+    auto solution = new PolyRingMatrix{_m, target.m(), _degree, _k};
+    auto half = target.polys()[_m - 1].halveEntries();
+    solution->polys()[_m - 1] = *half;
+    for ( size_t i = _m - 2; i < _m - 1; --i ) {
+      half = (target.polys()[i] + *half).halfEntries();
+      solution->polys()[i] = *half;
+    }
+    return solution;
+  }
+
 }
 

@@ -32,6 +32,8 @@ namespace lattice {
 
       virtual void uniformInit() = 0;
       virtual void ternaryInit() = 0;
+
+      virtual T* halveEntries() const = 0;
     };
 
 }

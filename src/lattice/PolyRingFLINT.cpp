@@ -105,6 +105,23 @@ namespace lattice {
     }
   }
 
+  PolyRingFLINT* PolyRingFLINT::halveEntries() const {
+    size_t mod = size_t(1) << _k;
+    size_t threshold = mod/2;
+    auto halvedPoly = new PolyRingFLINT{_degree, _k};
+    std::cout << "degree: " << _degree << std::endl;
+    for ( size_t i = 0; i < _degree; ++i ) {
+      size_t coeff = get( i );
+      std::cout << coeff << " ";
+      if ( coeff < threshold )
+        halvedPoly->set( i, coeff/2 );
+      else
+        halvedPoly->set( i, (int(coeff) - mod)/2 + mod );
+    }
+    std::cout << std::endl;
+    return halvedPoly;
+  }
+
   // Initialization helper methods
   void PolyRingFLINT::initPoly() {
     fmpz_t q_z;

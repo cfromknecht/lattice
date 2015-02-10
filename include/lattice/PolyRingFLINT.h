@@ -46,6 +46,8 @@ namespace lattice {
     void uniformInit();
     void ternaryInit();
 
+    PolyRingFLINT* halveEntries() const;
+
     ring_t* poly() const { return _poly; }
 
   private:
