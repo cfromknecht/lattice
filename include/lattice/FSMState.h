@@ -9,8 +9,8 @@ namespace lattice {
     size_t _stateID;
     bool _acceptState;
 
+    FSMState() = delete;
   public:
-    FSMState();
     FSMState( size_t stateID, bool acceptState );
     FSMState( const FSMState& other );
     FSMState& operator=( const FSMState& rhs );

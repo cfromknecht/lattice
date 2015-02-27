@@ -34,7 +34,9 @@ LDFLAGS := 	-L$(INSTALL_DIR)/lib \
 						-lm \
 						-lpthread \
 						-lmpfr \
+            -lgmp \
             -L/usr/local/lib \
+            -lflint \
             -L$(THIRD_PARTY_DIR)/flint
 
 

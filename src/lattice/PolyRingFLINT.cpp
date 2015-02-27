@@ -105,6 +105,7 @@ namespace lattice {
     }
   }
 
+
   PolyRingFLINT* PolyRingFLINT::halveEntries() const {
     size_t mod = size_t(1) << _k;
     size_t threshold = mod/2;

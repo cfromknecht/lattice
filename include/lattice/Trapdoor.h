@@ -7,6 +7,7 @@
 namespace lattice {
 
   class Trapdoor : public PolyRingMatrix {
+  private:
     PolyRingMatrix* _parityCheck;
     Trapdoor() = delete;
   public:

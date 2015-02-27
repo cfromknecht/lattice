@@ -39,15 +39,16 @@ namespace lattice {
     void setPoly( size_t row, size_t col, const PolyRing& ring );
     void setCoeff( size_t row, size_t col, size_t i, size_t val );
 
+    std::vector<PolyRing>& polys() { return _polys; }
+    const std::vector<PolyRing>& polys() const { return _polys; }
+
     void uniformInit(); 
     void uniformInit( size_t i ); 
     void ternaryInit(); 
     void ternaryInit( size_t i ); 
 
-    PolyRingMatrix* invertGTrapdoor( const PolyRingMatrix& target ) const;
+    PolyRingMatrix* gaussianElimination( const PolyRingMatrix& target ) const;
 
-    std::vector<PolyRing>& polys() { return _polys; }
-    const std::vector<PolyRing> polys() const { return _polys; }
   };
 
 }

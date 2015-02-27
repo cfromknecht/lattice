@@ -10,10 +10,10 @@
 namespace lattice {
 
   class BernoulliSampler {
-    private:
+  private:
     std::mt19937 _engine;                           // random number generator
 
-    public:
+  public:
     BernoulliSampler();
     BernoulliSampler( const BernoulliSampler& sampler );
     ~BernoulliSampler();

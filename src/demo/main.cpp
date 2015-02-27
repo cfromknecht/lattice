@@ -51,7 +51,7 @@ int main() {
     encrypt_time += microsecondsBetween( t1, t2 );
 
     gettimeofday( &t1, 0 );
-    auto TGe = TG * (y - A * s );
+    auto TGe = TG * (y - A * s);
     gettimeofday( &t2, 0 );
     decrypt_time += microsecondsBetween( t1, t2 );
 
@@ -61,12 +61,14 @@ int main() {
         fmpz_mod_poly_print( *TGe.polys()[j].poly() );
         std::cout << std::endl;
       }
+      std::cout << std::endl;
 
       std::cout << "error: " << std::endl;
       fmpz_mod_poly_print( *e.polys()[K-1].poly() );
       std::cout << std::endl;
+      std::cout << std::endl;
 
-      auto ePrime = *TGe.invertGTrapdoor( TGe );
+      auto ePrime = *TG.gaussianElimination( TGe );
       std::cout << "recovered error: " << std::endl;
       fmpz_mod_poly_print( *ePrime.polys()[0].poly() );
       std::cout << std::endl;
