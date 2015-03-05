@@ -2,9 +2,9 @@
 #define _STREAMING_DELEGATOR_H_
 
 #include <exception>
+#include <map>
 #include <string>
 #include <stringstream>
-#include <vector>
 
 namespace lattice {
 
@@ -14,7 +14,7 @@ namespace lattice {
     // FSM encoded with error-correcting transitions and states
     const EncryptedFSM& _encryptedFSM;
     // Stores all open data streams to be processed and verified
-    const std::vector<Stream> _streams{};
+    const std::map<size_t, std::string> _ipAddresses;
 
     StreamingDelegator() = delete;
 

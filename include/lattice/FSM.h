@@ -30,6 +30,12 @@ namespace lattice {
     void applyTransition( bool nextSymbol );
     bool isInAcceptState();
     size_t readState();
+    
+    std::map<size_t, FSMState> states() const { return _states; }
+    std::map<size_t, FSMTransition> transitions() const { return _transitions; }
+    
+    size_t currentState() const { return _currentState; }
+    size_t numStates() const { return _numStates; }
 
     bool buildFSMFromFile( const std::string& filename );
 
@@ -41,11 +47,6 @@ namespace lattice {
     // validation and optimization
     bool validFSM();
     size_t hopcroftOptimization();
-    
-    std::map<size_t, FSMState> states() const { return _states; }
-    std::map<size_t, FSMTransition> transitions() const { return _transitions; }
-    size_t currentState() const { return _currentState; }
-    size_t numStates() const { return _numStates; }
   };
 
 }

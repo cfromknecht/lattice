@@ -51,6 +51,8 @@ namespace lattice {
 
   };
 
+  typedef std::unique_ptr<PolyRingMatrix> PolyRingMatrixPtr;
+
 }
 
 #endif

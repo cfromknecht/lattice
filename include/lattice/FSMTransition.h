@@ -18,7 +18,6 @@ namespace lattice {
 
     size_t nextStateForSymbol( bool nextSymbol ) const;
 
-  protected:
     size_t nextStateFor0() const { return _nextStateFor0; }
     size_t nextStateFor1() const { return _nextStateFor1; }
   };
