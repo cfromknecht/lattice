@@ -11,9 +11,9 @@ namespace lattice {
   class EncodedFSMSecretKey : public EncodedFSMPublicKey {
   private:
 
-    PolyRingMatrix& _start;
-    PolyRingMatrix& _accept;
-    PolyRingMatrix& _reject;
+    PolyRingMatrixPtr _start;
+    PolyRingMatrixPtr _accept;
+    PolyRingMatrixPtr _reject;
     
     EncodedFSMSecretKey() = delete;
 
@@ -23,10 +23,10 @@ namespace lattice {
     EncodedFSMSecretKey( const EncodedFSMSecretKey& other );
     ~EncodedFSMSecretKey() {}
 
-    PolyRingMatrix& start() { return _start; }
-    PolyRingMatrix& accept() { return _accept; }
-    PolyRingMatrix& reject() { return _reject; }
-    EncodedFSMPublicKey* publicKey() { return new EncodedFSMPublicKey{*this}; }
+    PolyRingMatrixPtr start() const { return make_unique<PolyRingMatrix>( *_start ); }
+    PolyRingMatrixPtr accept() const { return make_unique<PolyRingMatrix>( *_accept ); }
+    PolyRingMatrixPtr reject() const { return make_unique<PolyRingMatrix>( *_reject ); }
+    EncodedFSMPublicKeyPtr publicKey() const { return make_unique<EncodedFSMPublicKey>( *this ); }
 
   };
 

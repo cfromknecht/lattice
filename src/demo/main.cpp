@@ -1,84 +1,63 @@
-#include <lattice/PolyRingMatrix.h>
+#include <lattice/StreamingDelegator.h>
+#include <lattice/Helper.hpp>
 
-#include <cstdlib>
+#include <stdexcept>
 #include <iostream>
+#include <string>
+
 #include <sys/time.h>
 
-const size_t N = 256;
-const size_t K = 8;
+class StreamingDelegatorDemo {
+private:
+  size_t _lambda = 256;
+  size_t _k = 8;
+  lattice::StreamingDelegator _streamingDelegator;
 
-const size_t ITERATIONS = 100;
-const size_t SPREAD = 100;
+  StreamingDelegatorDemo() = delete;
 
-double microsecondsBetween( struct timeval tv1, struct timeval tv2 ) {
-  return tv2.tv_usec - tv1.tv_usec + 1000000.0*(tv2.tv_sec - tv1.tv_sec);
-}
+public:
+  StreamingDelegatorDemo( const std::string& filename ) :
+      _streamingDelegator( _lambda, _k, lattice::FSM{filename} ) {}
+  StreamingDelegatorDemo( const lattice::FSM& fsm ) :
+    _streamingDelegator( _lambda, _k, fsm ) {}
+  ~StreamingDelegatorDemo() {}
 
-int main() {
-  srand( time( NULL ) );
+  void run() {
+    std::string ipAddress{"127.0.0.1"};
+    std::string testString{"Hello World, do I contain the letter a?"};
+    
+    std::cout << "[Demo]: Opening stream ..." << std::endl;
+    auto streamTag = _streamingDelegator.openStream( ipAddress );
 
-  double encrypt_time = 0;
-  double decrypt_time = 0;
-  struct timeval t1, t2;
+    struct timeval start, end;
+    std::cout << "[Demo]: Encoding test string ..." << std::endl;
+    gettimeofday( &start, 0 );
+    _streamingDelegator.encode( streamTag, testString, true );
+    gettimeofday( &end, 0 );
+    double encodeTime = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
+    std::cout << "[Demo]: Encoded string in " << encodeTime << " microseconds, "
+              << (encodeTime/(8*double(testString.length()))) << " microseconds/bit"
+              << std::endl;
 
-  auto A = lattice::PolyRingMatrix{K, 1, N, K};
-  auto s = lattice::PolyRingMatrix{1, 1, N, K};
-  auto e = lattice::PolyRingMatrix{K, 1, N, K};
-  auto G = lattice::PolyRingMatrix{K, 1, N, K};
-  auto m = lattice::PolyRingMatrix{1, 1, N, K};
-
-  A.uniformInit();
-
-  // initialize G
-  for ( size_t i = 0; i < K; ++i )
-    G.setCoeff( i, 0, 0, size_t(1) << i );
-
-  // trapdoor for G
-  auto TG = lattice::PolyRingMatrix{K, K, 256, K};
-  for ( size_t i = 0; i < K; ++i ) {
-    TG.setCoeff( i, i, 0, 2 );
-    if ( i < 7 )
-      TG.setCoeff( i, i + 1, 0, -1 );
-  }
-
-  for ( size_t i = 0; i < ITERATIONS; ++i ) {
-    gettimeofday( &t1, 0 );
-    m.uniformInit();
-    s.uniformInit();
-    e.ternaryInit();
-    auto y = A * s + G * m + e; // error correcting encryption
-    gettimeofday( &t2, 0 );
-    encrypt_time += microsecondsBetween( t1, t2 );
-
-    gettimeofday( &t1, 0 );
-    auto TGe = TG * (y - A * s);
-    gettimeofday( &t2, 0 );
-    decrypt_time += microsecondsBetween( t1, t2 );
-
-    if ( i == ITERATIONS - 1 ) {
-      std::cout << "TGe: " << std::endl;
-      for ( size_t j = 0; j < K; ++j  ) {
-        fmpz_mod_poly_print( *TGe.polys()[j].poly() );
-        std::cout << std::endl;
-      }
-      std::cout << std::endl;
-
-      std::cout << "error: " << std::endl;
-      fmpz_mod_poly_print( *e.polys()[K-1].poly() );
-      std::cout << std::endl;
-      std::cout << std::endl;
-
-      auto ePrime = *TG.gaussianElimination( TGe );
-      std::cout << "recovered error: " << std::endl;
-      fmpz_mod_poly_print( *ePrime.polys()[0].poly() );
-      std::cout << std::endl;
+    try {
+      std::cout << "[Demo]: Verifying evaluation ..." << std::endl;
+      auto result = _streamingDelegator.verify( streamTag );
+      std::cout << "[Demo]: input string ";
+      std::cout << (result ? "contains a" : "does not contain a") << std::endl;
+    } catch (lattice::DishonestEvaluatorException& e ) {
+      std::cout << e.what() << std::endl;
     }
   }
+};
 
-  std::cout << "total time: " << encrypt_time + decrypt_time << std::endl;
-  std::cout << "encrypt time: " << (encrypt_time/double(ITERATIONS)) << std::endl;
-  std::cout << "decrypt time: " << (decrypt_time/double(ITERATIONS)) << std::endl;
-
-  return 0;
+int main() {
+  std::string filename{"fsm/fsm-a.in"};
+  try {
+    StreamingDelegatorDemo demo{filename};
+    demo.run();
+  } catch (std::exception& e ) {
+    std::cout << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }
-

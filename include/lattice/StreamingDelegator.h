@@ -1,20 +1,32 @@
 #ifndef _STREAMING_DELEGATOR_H_
 #define _STREAMING_DELEGATOR_H_
 
+#include <lattice/DishonestEvaluatorException.h>
+#include <lattice/EncodedFSM.h>
+#include <lattice/Helper.hpp>
+
 #include <exception>
 #include <map>
+#include <sstream>
 #include <string>
-#include <stringstream>
 
 namespace lattice {
+
+  /**
+   * @class StreamingDelegator
+   * 
+   * Manages the delegation of computation for a specified FSM.  Each
+   * StreamingDelegator is responsible for delegating a single function.
+   * Multiple data streams can be multiplexed and sent to different evaluators.
+   */
 
   class StreamingDelegator {
   private:
 
     // FSM encoded with error-correcting transitions and states
-    const EncryptedFSM& _encryptedFSM;
+    const EncodedFSMPtr _encodedFSM;
     // Stores all open data streams to be processed and verified
-    const std::map<size_t, std::string> _ipAddresses;
+    std::map<size_t, std::string> _ipAddresses{};
 
     StreamingDelegator() = delete;
 
@@ -25,30 +37,40 @@ namespace lattice {
      * computation.
      *
      * @param k size_t - log 2 of the modulus for polynomial coefficients
-     *
      * @param fsm FSM& - an FSM defining the function to be delegated.
      */
     StreamingDelegator( size_t lambda, size_t k, const FSM& fsm );
 
     /**
      * Creates a new Stream and appends it to the _streams vector.
+     * 
+     * @param ipAddress std::string& - IPv4 or IPv6 address string of evaluator
      *
      * @return size_t - the tag referring to the newly created stream
      */
-    size_t openStream();
+    size_t openStream( const std::string& ipAddress );
 
     /**
-     * Encodes a single bit x for the stream corresponding to tag.
+     * Encodes a single bit x for the stream corresponding to the tag.
      *
      * @param tag size_t - tag indicating which stream to append the encrypted
      * bit.
-     *
      * @param x bool - the bit to be encrypted.
-     *
      * @param isLastBit bool - set to true when x is the last bit of the stream 
      * to be encrypted.
      */
     void encode( size_t tag, bool x, bool isLastBit );
+
+    /**
+     * Encodes a string to the stream corresponding to the tag.
+     *
+     * @param tag size_t - tag indicating which stream to append the encrypted
+     * string.
+     * @param string std::string& - the bytes to append to the stream
+     * @param isLastString bool - indicates whether this is the last string to 
+     * be appended
+     */
+    void encode( size_t tag, const std::string& string, bool isLastString );
 
     /**
      * Requests the verification and proof from the evaluating entity and
@@ -67,28 +89,7 @@ namespace lattice {
     bool verify( size_t tag );
   };
 
-  /**
-   * Exception to be thrown when a StreamingEvaluator returns an invalid proof.
-   * Signals that the evaluator's authenticity may need reconsidering.
-   *
-   * @param tag size_t - the tag indicating which stream's evaluator is
-   * dishonest.
-   */
-  class DishonestEvaluatorException: public std::runtime_error {
-  private:
-    const size_t _tag;
-    DishonestEvaluatorException() = delete;
-
-  public:
-    DishonestEvaluatorException( size_t tag ) : _tag{tag} {}
-
-    virtual char const* what() const throw() {
-      std::stringstream ss;
-      ss << "The StreamingEvaluator for tag " << _tag << " returned an invalid"
-            << " proof and may not be honest.";
-      return ss.str();
-    }
-  };
+  typedef std::unique_ptr<StreamingDelegator> StreamingDelegatorPtr;
 
 } // namespace lattice
 

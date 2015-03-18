@@ -6,12 +6,18 @@
 namespace lattice {
 
   PolyRingMatrix::PolyRingMatrix( size_t nn, size_t mm, size_t deg, size_t kk ) : 
-      _polys(std::vector<PolyRing>(nn*mm, PolyRing{deg, kk})), _n{nn}, _m{mm}, 
-      _degree(deg), _k(kk) {}
+      _polys( std::vector<PolyRing>{nn*mm, PolyRing{deg, kk}} ), 
+      _n( nn ), 
+      _m( mm ), 
+      _degree( deg ), 
+      _k( kk ) {}
 
   PolyRingMatrix::PolyRingMatrix( const PolyRingMatrix& o ) :
-      _polys(std::vector<PolyRing>(o.n()*o.m(), PolyRing{o.degree(), o.k()})), 
-      _n(o.n()), _m(o.m()), _degree(o.degree()), _k(o.k()) {
+      _polys( std::vector<PolyRing>{o.n()*o.m(), PolyRing{o.degree(), o.k()}} ), 
+      _n( o.n() ),
+      _m( o.m() ),
+      _degree( o.degree() ),
+      _k( o.k() ) {
     // copy polynomials
 #pragma omp parallel for
     for ( size_t i = 0; i < _n*_m; ++i )
@@ -112,24 +118,24 @@ namespace lattice {
     _polys[row*_m + col].set( i, val );
   }
 
+  void PolyRingMatrix::uniformInit( size_t i ) {
+    _polys[i].uniformInit();
+  }
+
   void PolyRingMatrix::uniformInit() {
 #pragma omp parallel for
     for ( size_t i = 0; i < _n*_m; ++i )
-      _polys[i].uniformInit();
+      this->uniformInit( i );
   }
 
-  void PolyRingMatrix::uniformInit( size_t i ) {
-    _polys[i].uniformInit();
+  void PolyRingMatrix::ternaryInit( size_t i ) {
+    _polys[i].ternaryInit();
   }
 
   void PolyRingMatrix::ternaryInit() {
 #pragma omp parallel for
     for ( size_t i = 0; i < _n*_m; ++i )
-      _polys[i].ternaryInit();
-  }
-
-  void PolyRingMatrix::ternaryInit( size_t i ) {
-    _polys[i].ternaryInit();
+      this->ternaryInit( i );
   }
 
   PolyRingMatrix*

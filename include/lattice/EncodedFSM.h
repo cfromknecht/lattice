@@ -18,10 +18,10 @@ namespace lattice {
   class EncodedFSM {
   private:
 
-    std::vector<PolyRingMatrix> _transitions{};
-    std::vector<PolyRingMatrix> _acceptTransitions{};
-    std::vector<PolyRingMatrix> _rejectTransitions{};
-    std::map<size_t, StreamState> _streamStates{};
+    std::vector<PolyRingMatrixPtr> _transitions{};
+    std::vector<PolyRingMatrixPtr> _acceptTransitions{};
+    std::vector<PolyRingMatrixPtr> _rejectTransitions{};
+    std::map<size_t, StreamStatePtr> _streamStates{};
     EncodedFSMSecretKeyPtr _secretKeyPtr;
     size_t _currentTag = 0;
 
@@ -34,7 +34,11 @@ namespace lattice {
 
     size_t openStream();
     EncodedBlockPtr encode( size_t tag, bool x, bool isLastBit );
+
+    StreamStatePtr streamStateForTag( size_t tag );
   };
+
+  typedef std::unique_ptr<EncodedFSM> EncodedFSMPtr;
  
 } // namespace lattice
 

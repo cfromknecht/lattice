@@ -1,23 +1,33 @@
 #include <lattice/FSMState.h>
 
+#include <cstdlib>
+#include <stdexcept>
+
 namespace lattice {
 
-  FSMState::FSMState() : _stateID{0}, _acceptState{false} {}
+  FSMState::FSMState() :
+      _stateID( 0 ),
+      _acceptState( false ) {
+    throw std::logic_error( "[FSMState] FSMState should never be initialized "
+        "with default constructor" );
+  }
 
   /**
    * FSMState Constructor
    * @param size_t stateID - unique identifier for state
    * @param bool acceptState - is this state an accept state
    */
-  FSMState::FSMState( size_t stateID_, bool acceptState_ ) : _stateID{stateID_}, 
-    _acceptState{acceptState_} {}
+  FSMState::FSMState( size_t stateID_, bool acceptState_ ) : 
+      _stateID( stateID_ ), 
+      _acceptState( acceptState_ ) {}
 
   /**
    * Instantiates a new FSMState using an existing FSMState
    * @param other - the FSMState to be copied
    */
-  FSMState::FSMState( const FSMState& other ) : _stateID{other.stateID()}, 
-    _acceptState{other.acceptState()} {}
+  FSMState::FSMState( const FSMState& other ) : 
+      _stateID( other.stateID() ), 
+      _acceptState( other.acceptState() ) {}
 
   /**
    * Sets an existing FSMState to be identical to an existing FSMState

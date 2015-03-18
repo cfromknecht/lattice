@@ -1,6 +1,7 @@
 #ifndef _LATTICE_HELPER_H_
 #define _LATTICE_HELPER_H_
 
+#include <iostream>
 #include <memory>
 
 namespace lattice {
@@ -12,6 +13,10 @@ namespace lattice {
 
   constexpr size_t operator "" _z ( unsigned long long n ) {
     return n;
+  }
+
+  static inline void log( const std::string& message ) {
+    std::cout << message << std::endl;
   }
 
 } // namespace lattice

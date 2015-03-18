@@ -14,16 +14,17 @@
 namespace lattice {
 
   class FSM {
-    std::map<size_t, FSMState> _states;
-    std::map<size_t, FSMTransition> _transitions;
+    std::map<size_t, FSMState> _states{};
+    std::map<size_t, FSMTransition> _transitions{};
     size_t _currentState;
     size_t _numStates;
 
+    FSM() = delete;
   public:
-    FSM();
     FSM( const FSM& other );
+    FSM( const std::string& filename );
     FSM& operator=( const FSM& rhs );
-    ~FSM();
+    ~FSM() {}
 
     // running FSM
     void reset();

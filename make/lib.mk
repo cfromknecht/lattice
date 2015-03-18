@@ -8,6 +8,7 @@ BUILD_DIR_PROJ := $(BUILD_DIR)/$(PROJ_NAME)
 OBJECTS_PROJ := \
 	$(BUILD_DIR_PROJ)/BernoulliSampler.o \
 	$(BUILD_DIR_PROJ)/DiscreteGaussianSampler.o \
+  $(BUILD_DIR_PROJ)/DishonestEvaluatorException.o \
   $(BUILD_DIR_PROJ)/EncodedBlock.o \
   $(BUILD_DIR_PROJ)/EncodedFSM.o \
   $(BUILD_DIR_PROJ)/EncodedFSMPublicKey.o \

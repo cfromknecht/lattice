@@ -5,6 +5,14 @@
 
 namespace lattice {
 
+  EncodedBlock::EncodedBlock() : 
+      encodedBit(nullptr), 
+      encodedTerminalToken(nullptr),
+      encodedRejectToken(nullptr),
+      encodedAcceptToken(nullptr),
+      initToken(nullptr),
+      B(nullptr) {}
+
   EncodedBlock::EncodedBlock( const EncodedBlock& other ) :
       encodedBit{new PolyRingMatrix{*other.encodedBit}},
       encodedTerminalToken{new PolyRingMatrix{*other.encodedTerminalToken}},

@@ -1,21 +1,36 @@
 #include <lattice/FSM.h>
 
+#include <iostream>
+
 namespace lattice {
 
   /**
    * Initializes an empty FSM
+  FSM::FSM() : _currentState{0}, _numStates{0} {}
    */
-  FSM::FSM() : _states{std::map<size_t, FSMState>{}}, 
-    _transitions{std::map<size_t, FSMTransition>{}}, _currentState{0}, 
-    _numStates{0} {}
 
   /**
    * Initializes an FSM to be identical to an existing FSM
    * @param FSM other - the FSM to be copied
    */
-  FSM::FSM( const FSM& other ) : _states{other.states()}, 
-    _transitions{other.transitions()}, _currentState{other.currentState()}, 
-    _numStates{other.numStates()} {}
+  FSM::FSM( const FSM& other ) : 
+      _states( other.states() ), 
+      _transitions( other.transitions() ), 
+      _currentState( other.currentState() ), 
+      _numStates( other.numStates() ) {}
+
+  /**
+   * Initializes an FSM to be identical to an existing FSM
+   * @param FSM other - the FSM to be copied
+   */
+  FSM::FSM( const std::string& filename ) : 
+      _currentState( 0 ), 
+      _numStates( 0 ) {
+    std::cout << "[FSM]: Building fsm from file " + filename << std::endl;
+    auto valid = this->buildFSMFromFile( filename );
+    if ( !valid ) 
+      throw std::runtime_error{"Invalid FSM imported from " + filename};
+  }
 
   /**
    * Assigns an existing FSM to be identical to an existing FSM
@@ -25,18 +40,13 @@ namespace lattice {
   FSM& FSM::operator=( const FSM& rhs ) {
     if ( this != &rhs ) {
       // copy states
-      _states = std::map<size_t, FSMState>(rhs.states());
-      _transitions = std::map<size_t, FSMTransition>(rhs.transitions());
+      _states = std::map<size_t, FSMState>{rhs.states()};
+      _transitions = std::map<size_t, FSMTransition>{rhs.transitions()};
       _numStates = rhs.numStates();
       _currentState = rhs.currentState();
     }
     return *this;
   }
-
-  /**
-   * Destroys and FSM
-   */
-  FSM::~FSM() {}
 
   /**
    * Resets the start state of the FSM
@@ -87,7 +97,7 @@ namespace lattice {
       throw std::runtime_error{"StateID already exists"};
 
     auto state = FSMState{stateID, acceptState};
-    _states[stateID] = state;
+    _states.insert( std::pair<size_t, FSMState>{stateID, state} );
     _numStates++;
   }
 
@@ -115,11 +125,12 @@ namespace lattice {
   /**
    * Constructs a state machine from the input filename
    * @param string filename - relative path to file
-   * @return - denotes the validtty of the FSM constructed from the input file
+   * @return - denotes the validity of the FSM constructed from the input file
    */
   bool FSM::buildFSMFromFile( const std::string& filename ) {
     std::ifstream ifs{filename, std::ifstream::in};
 
+    std::cout << "[FSM]: clearing state ..." << std::endl;
     // clear current FSM
     _states.clear();
     _transitions.clear();
@@ -129,17 +140,20 @@ namespace lattice {
     size_t count, blank, next0, next1;
     bool accept;
     ifs >> count;
+
+    std::cout << "[FSM]: parsing states ..." << std::endl;
     // parse states
     for ( size_t i = 0; i < count; ++i ) {
       ifs >> blank >> accept;
       addState( i, accept );
     }
+    std::cout << "[FSM]: parsing transitions ..." << std::endl;
     // parse transitions
     for ( size_t i = 0; i < count; ++i ) {
       ifs >> blank >> next0 >> next1;
       addTransition( i, next0, next1 );
     }
-
+    std::cout << "[FSM]: cheching validity of FSM ..." << std::endl;
     return validFSM();
   }
 
@@ -154,8 +168,7 @@ namespace lattice {
     if ( _states.size() != _transitions.size() )
       return false;
     // iterate over states
-    for ( std::map<size_t, FSMState>::iterator it = _states.begin(); 
-        it != _states.end(); ++it ) {
+    for ( auto it = _states.begin(); it != _states.end(); ++it ) {
       // states should match and have corresponding transitions
       size_t stateID = it->first;
       FSMState state = it->second;

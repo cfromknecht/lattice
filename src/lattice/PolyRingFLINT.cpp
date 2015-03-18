@@ -5,8 +5,11 @@
 namespace lattice {
 
   PolyRingFLINT::PolyRingFLINT( size_t nn, size_t kk ) :
-    PolyRingBase<PolyRingFLINT>{}, _degree(nn), _k(kk),
-    _modulus(size_t(1) << kk), _poly(new ring_t[1]), _F(new ring_t[1]) {
+      PolyRingBase<PolyRingFLINT>{}, 
+      _degree(nn), 
+      _k(kk),
+      _modulus(size_t(1) << kk), 
+      _poly(new ring_t[1]), _F(new ring_t[1]) {
     initPoly();
     initF();
   }
@@ -83,6 +86,9 @@ namespace lattice {
   }
 
   void PolyRingFLINT::set( size_t i, size_t coeff ) {
+    char buf[256];
+    char format[] = "%zu %zu"; 
+    log( sprintf( buf, format, i, coeff) );
     fmpz_mod_poly_set_coeff_ui( _poly[0], i, coeff );
   }
 

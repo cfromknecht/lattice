@@ -16,7 +16,9 @@ namespace lattice {
     PolyRingMatrixPtr initToken;
     PolyRingMatrixPtr B;
 
+    EncodedBlock();
     EncodedBlock( const EncodedBlock& other );
+    ~EncodedBlock() {}
   };
 
   typedef std::unique_ptr<EncodedBlock> EncodedBlockPtr;

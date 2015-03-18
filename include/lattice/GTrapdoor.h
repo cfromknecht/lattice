@@ -11,9 +11,11 @@ namespace lattice {
       GTrapdoor() = delete;
 
     public:
-      GTrapdoor( size_t n, size_t m, size_t degree );
+      GTrapdoor( size_t k_, size_t degree_ );
       GTrapdoor( const GTrapdoor& other );
       ~GTrapdoor() {}
+
+      void gTrapdoorInit();
   };
 
 } // namespace lattice
