@@ -11,7 +11,7 @@ GTEST_DIR := $(THIRD_PARTY_DIR)/gtest
 
 # commands
 SHELL := /bin/sh
-CXX := g++-4.9 # g++ (LLVM) does not support OPM
+CXX := g++ # g++ (LLVM) does not support OPM
 LD := $(CXX)
 CP := cp -r
 RSYNC := rsync -iCau --exclude='\.*' --delete
