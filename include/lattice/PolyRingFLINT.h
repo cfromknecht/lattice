@@ -13,7 +13,7 @@
 
 namespace lattice {
 
-  using ring_t = fmpz_mod_poly_struct*;
+  using ring_t = fmpz_mod_poly_struct;
   using ring_handler = std::unique_ptr<ring_t, void(*)(ring_t*)>;
 
   class PolyRingFLINT : public PolyRingBase<PolyRingFLINT> {
@@ -47,9 +47,6 @@ namespace lattice {
 
     std::string toString() const;
 
-  protected:
-    ring_t* copyPoly() const;
-
   private:
     size_t _degree;
     size_t _k;
@@ -58,8 +55,9 @@ namespace lattice {
     ring_handler _poly;
     ring_handler _F;
 
-    ring_t* initPoly();
-    ring_t* initF();
+    ring_handler initPoly();
+    ring_handler initF();
+    ring_handler copyPoly() const;
     static void deleteRingT( ring_t* r );
   };
 
