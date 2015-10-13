@@ -11,6 +11,7 @@
 
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace lattice {
@@ -23,7 +24,7 @@ namespace lattice {
     std::vector<PolyRingMatrixPtr> _rejectTransitions{};
     std::map<size_t, StreamStatePtr> _streamStates{};
     EncodedFSMSecretKeyPtr _secretKeyPtr;
-    size_t _currentTag = 0;
+    size_t _currentTag;
 
     EncodedFSM() = delete;
 
@@ -36,9 +37,14 @@ namespace lattice {
     EncodedBlockPtr encode( size_t tag, bool x, bool isLastBit );
 
     StreamStatePtr streamStateForTag( size_t tag );
-  };
 
-  typedef std::unique_ptr<EncodedFSM> EncodedFSMPtr;
+    std::string toString() const;
+    std::string toStringPublicKey() const;
+    std::string toStringSecretKey() const;
+    std::string toStringTransitions() const;
+
+    void evaluate( size_t tag );
+  };
  
 } // namespace lattice
 

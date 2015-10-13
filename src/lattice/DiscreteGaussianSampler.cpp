@@ -7,21 +7,29 @@
 namespace lattice {
 
   // initialization
-  DiscreteGaussianSampler::DiscreteGaussianSampler( size_t nn, size_t ll, 
-      size_t mod ) : _n{nn}, _l{ll}, _modulus{mod}, 
-      _thresholds{std::vector<double>( ll )}, 
-      _engine{std::mt19937{std::random_device{}()}} {
+  DiscreteGaussianSampler::DiscreteGaussianSampler( size_t nn, size_t ll, size_t mod ) : 
+      _n( nn ), 
+      _l( ll ), 
+      _modulus( mod ), 
+      _count( 0 ),
+      _bitsConsumed( 0 ),
+      _thresholds( std::vector<double>( ll ) ), 
+      _engine( std::mt19937{std::random_device{}()} ) {
     if ( _l > 63 ) 
-      throw std::runtime_error( "Cannot use word size of greater than 64 bits" );
+      throw std::runtime_error( "Cannot use word size of greater than 63 bits" );
     this->initializeLookup();
   }
 
-  DiscreteGaussianSampler::DiscreteGaussianSampler( 
-      const DiscreteGaussianSampler& sampler ) : _n{sampler.n()}, _l{sampler.l()}, 
-      _modulus{sampler.modulus()}, _thresholds{std::vector<double>( sampler.l() )},
-      _engine{std::mt19937{std::random_device{}()}} {
+  DiscreteGaussianSampler::DiscreteGaussianSampler( const DiscreteGaussianSampler& sampler ) : 
+      _n( sampler.n() ), 
+      _l( sampler.l() ), 
+      _modulus( sampler.modulus() ), 
+      _count( 0 ),
+      _bitsConsumed( 0 ),
+      _thresholds( std::vector<double>( sampler.l() ) ),
+      _engine( std::mt19937{std::random_device{}()} ) {
     if ( _l > 63 ) 
-      throw std::runtime_error( "Cannot use word size of greater than 64 bits" );
+      throw std::runtime_error( "Cannot use word size of greater than 63 bits" );
     this->initializeLookup();
   }
 
@@ -29,6 +37,7 @@ namespace lattice {
 
   // sampling
   size_t DiscreteGaussianSampler::sampleWithSupport( size_t c ) {
+    _count += 1;
     while ( true ) {
       size_t z = this->gaussianPositive();
       bool b = this->bernoulli( .5 );
@@ -46,6 +55,7 @@ namespace lattice {
     while ( true ) {
       size_t x = this->gaussianBinaryPositive();
       size_t y = intDist( _engine );
+      _bitsConsumed += 8;
       size_t z = x*_n + y;
       bool b = this->bernoulliExp( -y*(y + 2*x*_n) );
       if ( !b )
@@ -85,6 +95,7 @@ namespace lattice {
 
   bool DiscreteGaussianSampler::bernoulli( double p ) {
     std::bernoulli_distribution X( p );
+    _bitsConsumed += 2;
     return X( _engine );
   }
 

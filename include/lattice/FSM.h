@@ -40,14 +40,15 @@ namespace lattice {
 
     bool buildFSMFromFile( const std::string& filename );
 
+    // validation and optimization
+    bool validFSM();
+    size_t hopcroftOptimization();
+
   protected:
     // building FSM
     void addState( size_t stateID, bool acceptState );
     void addTransition( size_t fromState, size_t next0, size_t next1 );
 
-    // validation and optimization
-    bool validFSM();
-    size_t hopcroftOptimization();
   };
 
 }

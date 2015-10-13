@@ -24,9 +24,18 @@ namespace lattice {
   private:
 
     // FSM encoded with error-correcting transitions and states
-    const EncodedFSMPtr _encodedFSM;
+    EncodedFSM _encodedFSM;
     // Stores all open data streams to be processed and verified
     std::map<size_t, std::string> _ipAddresses{};
+
+    bool sendBlock( std::string ipAddress, EncodedBlockPtr& encodedBlock );
+
+    /*
+    bool writeBlock( Poco::Net::HTTPClientSession& session,
+        Poco::Net::HTTPRequest& request, 
+        Poco::Net::HTTPResponse&, 
+        EncodedBlockPtr& encodedBlock );
+    */
 
     StreamingDelegator() = delete;
 
@@ -87,6 +96,12 @@ namespace lattice {
      * the evaluator.
      */
     bool verify( size_t tag );
+
+    void evaluate( size_t tag ) { _encodedFSM.evaluate( tag ); }
+
+    size_t sizeOfTransitions() const { return _encodedFSM.toStringTransitions().length(); }
+    size_t sizeOfPublicKey() const { return _encodedFSM.toStringPublicKey().length(); }
+    size_t sizeOfSecretKey() const { return _encodedFSM.toStringSecretKey().length(); }
   };
 
   typedef std::unique_ptr<StreamingDelegator> StreamingDelegatorPtr;

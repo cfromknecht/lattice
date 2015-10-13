@@ -11,13 +11,17 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace lattice {
 
   EncodedFSM::EncodedFSM( size_t lambda, size_t k, const FSM& fsm ) :
-      _secretKeyPtr( make_unique<EncodedFSMSecretKey>( lambda, k ) ) {
+      _secretKeyPtr( make_unique<EncodedFSMSecretKey>( lambda, k ) ),
+      _currentTag( 0 ) {
     this->preProcess( fsm );
+
+    std::cout << "encoded fsm size:\n" << this->toString().size() << std::endl;
   }
 
   void EncodedFSM::preProcess( const FSM& fsm ) {
@@ -96,16 +100,13 @@ namespace lattice {
     EncodedBlockPtr encodedBlock = make_unique<EncodedBlock>();
 
     PolyRingMatrixPtr prevToken;
-    if ( _streamStates[tag]->isInitialUse ) {
+    if ( _streamStates[tag]->isInitialUse() ) {
         prevToken = _secretKeyPtr->buildUniformMatrix( 1, 1 );
-        // initToken should only be non nill for first bit in stream
-        encodedBlock->initToken = make_unique<PolyRingMatrix>( *prevToken +
-            *_secretKeyPtr->start() );
-    } else if ( !_streamStates[tag]->prevToken ) {
-      throw std::logic_error( "[EncodedFSM]: Stream has already been used but "
-          "previous token does not exist" );
+        // initToken should only be non nil for first bit in stream
+        auto initToken = *prevToken + *_secretKeyPtr->start();
+        encodedBlock->setInitToken( new PolyRingMatrix{initToken} );
     } else {
-      prevToken = std::move( _streamStates[tag]->prevToken );
+      prevToken = make_unique<PolyRingMatrix>( _streamStates[tag]->prevToken() );
     }
 
     auto currToken = _secretKeyPtr->buildUniformTempMatrix( 1, 1 );
@@ -116,10 +117,12 @@ namespace lattice {
     // encode transition
     auto encodedBit = *Ax * *prevToken + error + G * currToken;
 
-    encodedBlock->encodedBit = make_unique<PolyRingMatrix>(encodedBit);
-    newState->prevToken = make_unique<PolyRingMatrix>(currToken);
+    encodedBlock->setEncodedBit( new PolyRingMatrix{encodedBit} );
+    newState->setPrevToken( currToken );
+
 
     if ( isLastBit ) {
+      std::cout << "encoded bit size: " << encodedBlock->getEncodedBit()->toString().size() << std::endl;
       auto terminalToken = _secretKeyPtr->buildUniformTempMatrix( 1, 1 );
       auto terminalError = _secretKeyPtr->buildTernaryTempMatrix( k, 1 );
 
@@ -134,30 +137,49 @@ namespace lattice {
       auto e0 = _secretKeyPtr->buildTernaryTempMatrix( k, 1 );
       auto e1 = _secretKeyPtr->buildTernaryTempMatrix( k, 1 );
 
-      auto encodedRejectToken = B * (*_secretKeyPtr->reject() + terminalToken) + 
-          e0 + G * r0;
-      auto encodedAcceptToken = B * (*_secretKeyPtr->accept() + terminalToken) + 
-          e1 + G * r1;
+      auto encodedRejectToken = B * (*_secretKeyPtr->reject() + terminalToken) + e0 + G * r0;
+      auto encodedAcceptToken = B * (*_secretKeyPtr->accept() + terminalToken) + e1 + G * r1;
 
-      encodedBlock->encodedTerminalToken =
-          make_unique<PolyRingMatrix>(encodedTerminalToken);
-      encodedBlock->encodedRejectToken =
-          make_unique<PolyRingMatrix>(encodedRejectToken);
-      encodedBlock->encodedAcceptToken =
-          make_unique<PolyRingMatrix>(encodedAcceptToken);
-      encodedBlock->B = make_unique<PolyRingMatrix>(B);
+      encodedBlock->setEncodedTerminalToken( new PolyRingMatrix{encodedTerminalToken} );
+      encodedBlock->setEncodedRejectToken( new PolyRingMatrix{encodedRejectToken} );
+      encodedBlock->setEncodedAcceptToken( new PolyRingMatrix{encodedAcceptToken} );
+      encodedBlock->setB( new PolyRingMatrix{B} );
 
-      newState->r0 = make_unique<PolyRingMatrix>(r0);
-      newState->r1 = make_unique<PolyRingMatrix>(r1);
+      newState->setR0( r0 );
+      newState->setR1( r1 );
     }
-
-    // update previous state
-    _streamStates[tag] = std::move( newState );
 
     if ( !_streamStates[tag] )
       std::cout << "[EncodedFSM]: Stream state does not exist" << std::endl;
 
+    // update previous state
+    _streamStates[tag] = std::move( newState );
+
     return encodedBlock;
+  }
+
+  void EncodedFSM::evaluate( size_t tag ) {
+    auto lambda = _secretKeyPtr->lambda();
+    auto k = _secretKeyPtr->k();
+
+    // trapdoor for G
+    auto TG = lattice::PolyRingMatrix{k, k, lambda, k};
+    for ( size_t i = 0; i < k; ++i ) {
+      TG.setCoeff( i, i, 0, 2 );
+      if ( i < k-1 )
+        TG.setCoeff( i, i + 1, 0, -1 );
+    }
+
+    auto add = _streamStates[tag]->prevToken() + _streamStates[tag]->prevToken();
+    auto A = _secretKeyPtr->A0();
+    auto randomToken = PolyRingMatrix{1, 1, lambda, k};
+    auto randomShit = PolyRingMatrix{k, 1, lambda, k};
+    randomToken.uniformInit();
+    randomShit.uniformInit();
+
+    auto Ay = *A * randomToken;
+    auto TGe = TG * (randomShit - Ay);
+    auto m = randomShit - Ay - TGe;
   }
 
   StreamStatePtr EncodedFSM::streamStateForTag( size_t tag ) {
@@ -166,6 +188,49 @@ namespace lattice {
 //    std::cout << "[EncodedFSM]: Stream state count for tag " << _currentTag 
 //              << ": " << _streamStates.count( _currentTag ) << std::endl;
     return make_unique<StreamState>( *_streamStates[tag] );
+  }
+
+  std::string EncodedFSM::toString() const {
+    std::stringstream ss;
+
+    ss << this->toStringPublicKey();
+    ss << this->toStringSecretKey();
+    ss << this->toStringTransitions();
+
+    return ss.str();
+  }
+
+  std::string EncodedFSM::toStringPublicKey() const {
+    std::stringstream ss;
+
+    ss << _secretKeyPtr->At()->toString();
+    ss << _secretKeyPtr->A0()->toString();
+    ss << _secretKeyPtr->A1()->toString();
+
+    return ss.str();
+  }
+
+  std::string EncodedFSM::toStringSecretKey() const {
+    std::stringstream ss;
+
+    ss << _secretKeyPtr->start()->toString();
+    ss << _secretKeyPtr->accept()->toString();
+    ss << _secretKeyPtr->reject()->toString();
+
+    return ss.str();
+  }
+
+  std::string EncodedFSM::toStringTransitions() const {
+    std::stringstream ss;
+
+    for ( size_t i = 0; i < _transitions.size(); ++i )
+      ss << _transitions[i]->toString();
+    for ( size_t i = 0; i < _acceptTransitions.size(); ++i )
+      ss << _transitions[i]->toString();
+    for ( size_t i = 0; i < _rejectTransitions.size(); ++i )
+      ss << _transitions[i]->toString();
+
+    return ss.str();
   }
 
 } // namespace lattice

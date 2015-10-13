@@ -1,6 +1,8 @@
 #include <lattice/PolyRingFLINT.h>
 
 #include <iostream>
+#include <string>
+#include <sstream>
 
 namespace lattice {
 
@@ -9,22 +11,18 @@ namespace lattice {
       _degree(nn), 
       _k(kk),
       _modulus(size_t(1) << kk), 
-      _poly(new ring_t[1]), _F(new ring_t[1]) {
-    initPoly();
-    initF();
-  }
+      _poly(initPoly(), &deleteRingT), 
+      _F(initF(), &deleteRingT) {}
 
   PolyRingFLINT::PolyRingFLINT( const PolyRingFLINT& other ) :
-      PolyRingBase<PolyRingFLINT>{}, _degree(other._degree), _k(other._k),
-      _modulus(other._modulus), _poly(new ring_t[1]), _F(new ring_t[1]) {
-    copyPoly( other.poly() );
-    initF();
-  }
+      PolyRingBase<PolyRingFLINT>{}, 
+      _degree(other._degree), 
+      _k(other._k),
+      _modulus(other._modulus), 
+      _poly(other.copyPoly(), &deleteRingT), 
+      _F(initF(), &deleteRingT) {}
 
-  PolyRingFLINT::~PolyRingFLINT() {
-    clearPoly();
-    clearF();
-  }
+  PolyRingFLINT::~PolyRingFLINT() {}
 
   // PolyRingBase implementation
   PolyRingFLINT& PolyRingFLINT::operator=( const PolyRingFLINT& rhs ) {
@@ -32,23 +30,23 @@ namespace lattice {
       _degree = rhs._degree;
       _k = rhs._k;
       _modulus = rhs._modulus;
-      fmpz_mod_poly_set( _poly[0], rhs._poly[0] );
+      fmpz_mod_poly_set( *_poly, *rhs._poly );
     }
     return *this;
   }
 
   PolyRingFLINT& PolyRingFLINT::operator+=( const PolyRingFLINT& rhs ) {
-    fmpz_mod_poly_add( _poly[0], _poly[0], rhs._poly[0] );
+    fmpz_mod_poly_add( *_poly, *_poly, *rhs._poly );
     return *this;
   }
 
   PolyRingFLINT& PolyRingFLINT::operator-=( const PolyRingFLINT& rhs ) {
-    fmpz_mod_poly_sub( _poly[0], _poly[0], rhs._poly[0] );
+    fmpz_mod_poly_sub( *_poly, *_poly, *rhs._poly );
     return *this;
   }
 
   PolyRingFLINT& PolyRingFLINT::operator*=( const PolyRingFLINT& rhs ) {
-    fmpz_mod_poly_mulmod( _poly[0], _poly[0], rhs._poly[0], _F[0] );
+    fmpz_mod_poly_mulmod( *_poly, *_poly, *rhs._poly, *_F );
     return *this;
   }
 
@@ -81,7 +79,7 @@ namespace lattice {
   size_t PolyRingFLINT::get( size_t i ) const {
     fmpz_t coeff_z;
     fmpz_init( coeff_z );
-    fmpz_mod_poly_get_coeff_fmpz( coeff_z, _poly[0], i );
+    fmpz_mod_poly_get_coeff_fmpz( coeff_z, *_poly, i );
     return fmpz_get_ui( coeff_z );
   }
 
@@ -89,24 +87,25 @@ namespace lattice {
     char buf[256];
     char format[] = "%zu %zu"; 
     log( sprintf( buf, format, i, coeff) );
-    fmpz_mod_poly_set_coeff_ui( _poly[0], i, coeff );
+    fmpz_mod_poly_set_coeff_ui( *_poly, i, coeff );
   }
 
   void PolyRingFLINT::uniformInit() {
     for ( size_t i = 0; i < _degree; ++i )
-      fmpz_mod_poly_set_coeff_ui( _poly[0], i, rand() );
+      fmpz_mod_poly_set_coeff_ui( *_poly, i, rand() );
   }
 
   void PolyRingFLINT::ternaryInit() {
-    auto bernoulliDist = BernoulliSampler{};
+    BernoulliSampler bernoulliDist{};
+
     for ( size_t i = 0; i < _degree; ++i ) {
       if ( bernoulliDist.sample() ) // 0 with probability 1/2
-        fmpz_mod_poly_set_coeff_ui( _poly[0], i, 0 );
+        fmpz_mod_poly_set_coeff_ui( *_poly, i, 0 );
       else {
         if ( bernoulliDist.sample() ) // 1 with probability 1/4
-          fmpz_mod_poly_set_coeff_ui( _poly[0], i, 1 );
+          fmpz_mod_poly_set_coeff_ui( *_poly, i, 1 );
         else
-          fmpz_mod_poly_set_coeff_ui( _poly[0], i, _modulus - 1 );
+          fmpz_mod_poly_set_coeff_ui( *_poly, i, _modulus - 1 );
       }
     }
   }
@@ -130,39 +129,68 @@ namespace lattice {
   }
 
   // Initialization helper methods
-  void PolyRingFLINT::initPoly() {
+  ring_t* PolyRingFLINT::initPoly() {
+    auto rPtr = new ring_t;
+    *rPtr = new fmpz_mod_poly_struct;
+
     fmpz_t q_z;
     fmpz_init_set_ui( q_z, _modulus );
 
-    fmpz_mod_poly_init2( _poly[0], q_z, _degree );
+    fmpz_mod_poly_init2( *rPtr, q_z, _degree );
 
     fmpz_clear( q_z );
+
+    return rPtr;
   }
 
-  void PolyRingFLINT::copyPoly( ring_t* r ) {
-    initPoly();
-    fmpz_mod_poly_set( _poly[0], r[0] );
-  }
+  ring_t* PolyRingFLINT::initF() {
+    auto rPtr = new ring_t;
+    *rPtr = new fmpz_mod_poly_struct;
 
-  void PolyRingFLINT::clearPoly() {
-    fmpz_mod_poly_clear( _poly[0] );
-    delete [] _poly;
-  }
-
-  void PolyRingFLINT::initF() {
     fmpz_t q_z;
     fmpz_init_set_ui( q_z, _modulus );
 
-    fmpz_mod_poly_init2( _F[0], q_z, _degree );
-    fmpz_mod_poly_set_coeff_ui( _F[0], 0, 1 );
-    fmpz_mod_poly_set_coeff_ui( _F[0], _degree, 1 );
+    fmpz_mod_poly_init2( *rPtr, q_z, _degree );
+    fmpz_mod_poly_set_coeff_ui( *rPtr, 0, 1 );
+    fmpz_mod_poly_set_coeff_ui( *rPtr, _degree, 1 );
 
     fmpz_clear( q_z );
+
+    return rPtr;
   }
 
-  void PolyRingFLINT::clearF() {
-    fmpz_mod_poly_clear( _F[0] );
-    delete [] _F;
+  ring_t* PolyRingFLINT::copyPoly() const {
+    auto newRPtr = new ring_t;
+    *newRPtr = new fmpz_mod_poly_struct;
+
+    fmpz_t q_z;
+    fmpz_init_set_ui( q_z, _modulus );
+
+    fmpz_mod_poly_init2( *newRPtr, q_z, _degree );
+    fmpz_mod_poly_set( *newRPtr, *_poly );
+
+    fmpz_clear( q_z );
+
+    return newRPtr;
+  }
+
+  void PolyRingFLINT::deleteRingT( ring_t* rPtr ) {
+    fmpz_mod_poly_clear( *rPtr );
+    delete *rPtr;
+    delete rPtr;
+  }
+
+  std::string PolyRingFLINT::toString() const {
+    std::stringstream ss;
+
+    ss << _degree << " " << _k << std::endl;
+    for ( size_t i = 0; i < _degree; ++i ) {
+      if ( i > 0 ) ss << " ";
+      ss << get( i );
+    }
+    ss << std::endl;
+
+    return ss.str();
   }
 
 }

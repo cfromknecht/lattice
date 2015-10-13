@@ -1,8 +1,12 @@
-#ifndef _POLY_RING_MATRIX_
-#define _POLY_RING_MATRIX_
+#ifndef LATTICE_POLY_RING_MATRIX
+#define LATTICE_POLY_RING_MATRIX
 
 #include <lattice/PolyRing.hpp>
 
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
 #include <vector>
 
 namespace lattice {
@@ -16,6 +20,7 @@ namespace lattice {
     size_t _k;
 
     PolyRingMatrix() = delete;
+
   public:
     PolyRingMatrix( size_t nn, size_t mm, size_t deg, size_t kk );
     PolyRingMatrix( const PolyRingMatrix& other );
@@ -49,7 +54,27 @@ namespace lattice {
 
     PolyRingMatrix* gaussianElimination( const PolyRingMatrix& target ) const;
 
+    std::string toString();
+
   };
+
+  inline bool operator==( const PolyRingMatrix& lhs, const PolyRingMatrix& rhs ) {
+    // same object?
+    if ( &lhs == &rhs ) return true;
+    // are params equal?
+    auto checkParams = lhs.n() == rhs.n() && 
+                       lhs.m() == rhs.m() && 
+                       lhs.degree() == rhs.degree() && 
+                       lhs.k() == rhs.k() &&
+                       lhs.polys().size() == rhs.polys().size();
+    if ( !checkParams ) return false;
+    // check all polynomials
+    for ( size_t i = 0; i < lhs.polys().size(); ++i )
+      if ( lhs.polys()[i] != rhs.polys()[i] )
+        return false;
+    // must be equal
+    return true;
+  }
 
   typedef std::unique_ptr<PolyRingMatrix> PolyRingMatrixPtr;
 

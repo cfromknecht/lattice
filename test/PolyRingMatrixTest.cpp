@@ -61,4 +61,3 @@ TEST( PolyRingMatrixTest, assingment ) {
   for ( size_t i = 0; i < degree; ++i )
     ASSERT_EQ( matrix.polys()[0].get( i ), matrixCopy.polys()[0].get( i ) );
 }
-

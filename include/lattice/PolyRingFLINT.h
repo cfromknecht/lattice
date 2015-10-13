@@ -5,21 +5,18 @@
 #include <lattice/PolyRingBase.hpp>
 
 #include <flint/fmpz_mod_poly.h>
+
 #include <functional>
 #include <memory>
+#include <string>
+#include <sstream>
 
 namespace lattice {
 
-  typedef fmpz_mod_poly_t ring_t;
+  using ring_t = fmpz_mod_poly_struct*;
+  using ring_handler = std::unique_ptr<ring_t, void(*)(ring_t*)>;
 
   class PolyRingFLINT : public PolyRingBase<PolyRingFLINT> {
-  private:
-    size_t _degree;
-    size_t _k;
-    size_t _modulus;
-    ring_t* _poly;
-    ring_t* _F;
-
   public:
     PolyRingFLINT( size_t nn, size_t kk );
     PolyRingFLINT( const PolyRingFLINT& other );
@@ -48,14 +45,22 @@ namespace lattice {
 
     PolyRingFLINT* halveEntries() const;
 
-    ring_t* poly() const { return _poly; }
+    std::string toString() const;
+
+  protected:
+    ring_t* copyPoly() const;
 
   private:
-    void initPoly();
-    void copyPoly( ring_t* r );
-    void clearPoly();
-    void initF();
-    void clearF();
+    size_t _degree;
+    size_t _k;
+    size_t _modulus;
+
+    ring_handler _poly;
+    ring_handler _F;
+
+    ring_t* initPoly();
+    ring_t* initF();
+    static void deleteRingT( ring_t* r );
   };
 
 }

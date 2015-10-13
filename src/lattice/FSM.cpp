@@ -26,7 +26,6 @@ namespace lattice {
   FSM::FSM( const std::string& filename ) : 
       _currentState( 0 ), 
       _numStates( 0 ) {
-    std::cout << "[FSM]: Building fsm from file " + filename << std::endl;
     auto valid = this->buildFSMFromFile( filename );
     if ( !valid ) 
       throw std::runtime_error{"Invalid FSM imported from " + filename};
@@ -130,7 +129,6 @@ namespace lattice {
   bool FSM::buildFSMFromFile( const std::string& filename ) {
     std::ifstream ifs{filename, std::ifstream::in};
 
-    std::cout << "[FSM]: clearing state ..." << std::endl;
     // clear current FSM
     _states.clear();
     _transitions.clear();
@@ -141,19 +139,18 @@ namespace lattice {
     bool accept;
     ifs >> count;
 
-    std::cout << "[FSM]: parsing states ..." << std::endl;
     // parse states
     for ( size_t i = 0; i < count; ++i ) {
       ifs >> blank >> accept;
-      addState( i, accept );
+      this->addState( i, accept );
     }
-    std::cout << "[FSM]: parsing transitions ..." << std::endl;
+
     // parse transitions
     for ( size_t i = 0; i < count; ++i ) {
       ifs >> blank >> next0 >> next1;
-      addTransition( i, next0, next1 );
+      this->addTransition( i, next0, next1 );
     }
-    std::cout << "[FSM]: cheching validity of FSM ..." << std::endl;
+
     return validFSM();
   }
 

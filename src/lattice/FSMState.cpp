@@ -8,7 +8,7 @@ namespace lattice {
   FSMState::FSMState() :
       _stateID( 0 ),
       _acceptState( false ) {
-    throw std::logic_error( "[FSMState] FSMState should never be initialized "
+    throw std::logic_error( "[FSMState]: FSMState should never be initialized "
         "with default constructor" );
   }
 

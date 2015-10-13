@@ -14,6 +14,8 @@ namespace lattice {
     const size_t _n;                                // security parameter
     const size_t _l;                                // bits of input value
     const size_t _modulus;
+    size_t _count;
+    size_t _bitsConsumed;
     std::vector<double> _thresholds;                // lookup table
     std::mt19937 _engine;                           // random number generator
 
@@ -25,6 +27,8 @@ namespace lattice {
     ~DiscreteGaussianSampler();
     inline size_t sample() { return this->sampleWithSupport( 0 ); }
     size_t sampleWithSupport( size_t c );
+    inline size_t count() const { return _count; }
+    inline size_t bitsConsumed() const { return _bitsConsumed; }
 
     protected:
     inline size_t n() const { return _n; }

@@ -2,6 +2,9 @@
 
 #include <cassert>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace lattice {
 
@@ -30,21 +33,15 @@ namespace lattice {
       _n = rhs.n();
       _m = rhs.m();
       _polys = std::vector<PolyRing>(_n*_m, PolyRing{_degree, _k});
-      std::cout << "initial: ";
-      fmpz_mod_poly_print( *_polys[0].poly() );
-      std::cout << std::endl;
 
-      std::cout << "rhs: ";
-      fmpz_mod_poly_print( *rhs._polys[0].poly() );
-      std::cout << std::endl;
+      std::cout << "initial: " << _polys[0].toString() << std::endl;
+      std::cout << "rhs: " << rhs._polys[0].toString() << std::endl;
 
 #pragma omp parallel for
       for ( size_t i = 0; i < _n*_m; ++i )
         _polys[i] = rhs._polys[i];
 
-      std::cout << "after: ";
-      fmpz_mod_poly_print( *_polys[0].poly() );
-      std::cout << std::endl;
+      std::cout << "after: " << _polys[0].toString() << std::endl;
     }
     return *this;
   }
@@ -148,6 +145,17 @@ namespace lattice {
     //auto b = new PolyRingMatrix{target};
 
     return solution;
+  }
+
+  std::string PolyRingMatrix::toString() {
+    std::stringstream ss;
+
+    ss << _n << " " << _m << " " << _degree << " " << _k << std::endl;
+
+    for ( size_t i = 0; i < _polys.size(); ++i )
+      ss << _polys[i].toString();
+
+    return ss.str();
   }
 
 }

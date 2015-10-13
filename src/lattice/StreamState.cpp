@@ -3,38 +3,48 @@
 #include <lattice/Helper.hpp>
 #include <lattice/PolyRingMatrix.h>
 
+#include <cassert>
 #include <memory>
 
 namespace lattice {
 
   StreamState::StreamState( bool isInitialUse_ ) : 
-      prevToken( nullptr ),
-      r0( nullptr ),
-      r1( nullptr ),
-      isInitialUse( isInitialUse_ ) {}
+      _prevToken( nullptr ),
+      _r0( nullptr ),
+      _r1( nullptr ),
+      _isInitialUse( isInitialUse_ ) {}
 
   StreamState::StreamState( const StreamState& other ) :
-      prevToken( make_unique<PolyRingMatrix>( *other.prevToken ) ),
-      r0( make_unique<PolyRingMatrix>( *other.r0) ),
-      r1( make_unique<PolyRingMatrix>( *other.r1) ),
-      isInitialUse( other.isInitialUse ) {}
+      _prevToken( nullptr ),
+      _r0( nullptr ),
+      _r1( nullptr ),
+      _isInitialUse( other.isInitialUse() ) {
+    _prevToken = new PolyRingMatrix( other.prevToken() );
+    _r0 = new PolyRingMatrix( other.r0() );
+    _r1 = new PolyRingMatrix( other.r1() );
+  }
 
-  StreamState& StreamState::operator=( const StreamState& other ) {
-    prevToken.reset( new PolyRingMatrix{*other.prevToken} );
-    r0.reset( new PolyRingMatrix{ *other.r0 } );
-    r1.reset( new PolyRingMatrix{ *other.r1 } );
-    isInitialUse = other.isInitialUse;
+  StreamState& StreamState::operator=( const StreamState& rhs ) {
+    if ( this != &rhs ) {
+      _prevToken = new PolyRingMatrix( rhs.prevToken() );
+      _r0 = new PolyRingMatrix( rhs.r0() );
+      _r1 = new PolyRingMatrix( rhs.r1() );
+      _isInitialUse = rhs.isInitialUse();
+    }
 
     return *this;
   }
 
-  StreamState& StreamState::operator=( StreamState& other ) {
-    prevToken = std::move( other.prevToken );
-    r0 = std::move( other.r0 );
-    r1 = std::move( other.r1 );
-    isInitialUse = other.isInitialUse;
+  void StreamState::setPrevToken( const PolyRingMatrix& newPrevToken) {
+    _prevToken = new PolyRingMatrix( newPrevToken );
+  }
 
-    return *this;
+  void StreamState::setR0( const PolyRingMatrix& newR0) {
+    _r0 = new PolyRingMatrix( newR0 );
+  }
+
+  void StreamState::setR1( const PolyRingMatrix& newR1) {
+    _r1 = new PolyRingMatrix( newR1 );
   }
 
 } // namespace lattice
