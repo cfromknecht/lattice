@@ -84,9 +84,6 @@ namespace lattice {
   }
 
   void PolyRingFLINT::set( size_t i, size_t coeff ) {
-    char buf[256];
-    char format[] = "%zu %zu"; 
-    log( sprintf( buf, format, i, coeff) );
     fmpz_mod_poly_set_coeff_ui( _poly.get(), i, coeff );
   }
 
@@ -96,7 +93,7 @@ namespace lattice {
   }
 
   void PolyRingFLINT::ternaryInit() {
-    BernoulliSampler bernoulliDist{};
+    BernoulliSampler<512> bernoulliDist{};
 
     for ( size_t i = 0; i < _degree; ++i ) {
       if ( bernoulliDist.sample() ) // 0 with probability 1/2

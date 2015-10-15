@@ -1,5 +1,5 @@
-#ifndef LATTICE_POLY_RING_MATRIX
-#define LATTICE_POLY_RING_MATRIX
+#ifndef LATTICE_POLY_RING_MATRIX_H_
+#define LATTICE_POLY_RING_MATRIX_H_
 
 #include <lattice/PolyRing.hpp>
 
@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace lattice {
 
@@ -80,5 +81,5 @@ namespace lattice {
 
 }
 
-#endif
+#endif /* LATTICE_POLY_RING_MATRIX_H_ */
 

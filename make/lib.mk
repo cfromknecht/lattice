@@ -6,7 +6,6 @@ TARGET_PROJ := $(INSTALL_DIR)/lib/lib$(PROJ_NAME).a
 BUILD_DIR_PROJ := $(BUILD_DIR)/$(PROJ_NAME)
 
 OBJECTS_PROJ := \
-	$(BUILD_DIR_PROJ)/BernoulliSampler.o \
 	$(BUILD_DIR_PROJ)/DiscreteGaussianSampler.o \
   $(BUILD_DIR_PROJ)/DishonestEvaluatorException.o \
   $(BUILD_DIR_PROJ)/EncodedBlock.o \
@@ -22,6 +21,8 @@ OBJECTS_PROJ := \
 	$(BUILD_DIR_PROJ)/PolyRingBase.o \
 	$(BUILD_DIR_PROJ)/PolyRingFLINT.o \
 	$(BUILD_DIR_PROJ)/PolyRingMatrix.o \
+  $(BUILD_DIR_PROJ)/RingMatrixBase.o \
+  $(BUILD_DIR_PROJ)/RingMatrix.o \
   $(BUILD_DIR_PROJ)/StreamState.o \
   $(BUILD_DIR_PROJ)/StreamingDelegator.o \
 	$(BUILD_DIR_PROJ)/Trapdoor.o

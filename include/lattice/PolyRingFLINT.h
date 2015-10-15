@@ -1,8 +1,9 @@
 #ifndef _POLY_RING_FLINT_
 #define _POLY_RING_FLINT_
 
-#include <lattice/BernoulliSampler.h>
+#include <lattice/BernoulliSampler.hpp>
 #include <lattice/PolyRingBase.hpp>
+#include <lattice/RingMatrix.hpp>
 
 #include <flint/fmpz_mod_poly.h>
 
@@ -14,7 +15,7 @@
 namespace lattice {
 
   using ring_t = fmpz_mod_poly_struct;
-  using ring_handler = std::unique_ptr<ring_t, void(*)(ring_t*)>;
+  using ring_handler = std::unique_ptr< ring_t, void(*)(ring_t*) >;
 
   class PolyRingFLINT : public PolyRingBase<PolyRingFLINT> {
   public:

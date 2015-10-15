@@ -1,94 +1,103 @@
-#include <lattice/StreamingDelegator.h>
-#include <lattice/Helper.hpp>
+#include <lattice/RingMatrix.hpp>
 
-#include <stdexcept>
+#include <cstdlib>
 #include <iostream>
-#include <string>
+#include <stdexcept>
 
 #include <sys/time.h>
 
-std::string FSM_FILENAME = "fsm/fsm-a.in";
-size_t K = 10;
+const size_t DEG = 256;
+const size_t K = 8;
 
-class StreamingDelegatorDemo {
-private:
-  size_t _k = K;
-  size_t _lambda = size_t(1) << K;
-  lattice::StreamingDelegator _streamingDelegator;
+const size_t ITERATIONS = 100;
+const size_t SPREAD = 100;
 
-  StreamingDelegatorDemo() = delete;
+double microsecondsBetween( struct timeval tv1, struct timeval tv2 ) {
+  return tv2.tv_usec - tv1.tv_usec + 1000000.0*(tv2.tv_sec - tv1.tv_sec);
+}
 
-public:
-  StreamingDelegatorDemo( const std::string& filename ) :
-      _streamingDelegator( _lambda, _k, lattice::FSM( filename ) ) {}
-  StreamingDelegatorDemo( const lattice::FSM& fsm ) :
-    _streamingDelegator( _lambda, _k, fsm ) {}
-  ~StreamingDelegatorDemo() {}
+template< size_t n, size_t m, size_t deg, size_t k >
+void encodeString( lattice::RingMatrix<n,m,deg,k>& rings, const std::string& msg ) {
+  auto msgLength = msg.length();
+  if ( msgLength * 8 > deg )
+    throw std::logic_error{"Cannot encode more than 8*DEG bytes."};
 
-  void run() {
-    std::string ipAddress{"127.0.0.1"};
-    std::string testString{"Hello World, do I contain the letter a?"};
-
-    std::cout << "[Demo]: initializing FSM ... ";
-    auto fsm = lattice::FSM( FSM_FILENAME );
-    std::cout << "DONE" << std::endl;
-    auto numStates = fsm.numStates();
-
-    std::cout << "[Demo]: FSM has " << numStates << " states" << std::endl;
-
-    std::cout << "[Demo]: Size of public key: ";
-    std::cout << _streamingDelegator.sizeOfPublicKey() << std::endl;
-
-    std::cout << "[Demo]: Size of secret key: ";
-    std::cout << _streamingDelegator.sizeOfSecretKey() << std::endl;
-
-    std::cout << "[Demo]: Size of transitions: ";
-    std::cout <<
-    (double(_streamingDelegator.sizeOfTransitions())/double(numStates)) << std::endl;
-    
-    // open stream with evaluator
-    std::cout << "[Demo]: Opening stream ..." << std::endl;
-    auto streamTag = _streamingDelegator.openStream( ipAddress );
-
-    // encode and send test string
-    struct timeval start, end;
-    std::cout << "[Demo]: Encoding test string ..." << std::endl;
-    gettimeofday( &start, 0 );
-    _streamingDelegator.encode( streamTag, testString, true );
-    gettimeofday( &end, 0 );
-    double encodeTime = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
-    std::cout << "[Demo]: Encoded string in " << encodeTime << " microseconds, "
-              << (encodeTime/(8*double(testString.length()))) << " microseconds/bit"
-              << std::endl;
-
-    std::cout << "[Demo]: evaluating ..." << std::endl;
-    gettimeofday( &start, 0 );
-    for ( size_t i = 0; i < 100; ++i )
-      _streamingDelegator.evaluate( streamTag );
-    gettimeofday( &end, 0 );
-    double evaluateTime = 1000000.0 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
-    std::cout << "[Demo]: Evaluated string in " << evaluateTime << " microseconds, "
-              << (evaluateTime/100.0) << " microseconds/state"
-              << std::endl;
-
-    try {
-      std::cout << "[Demo]: Verifying evaluation ..." << std::endl;
-      auto result = _streamingDelegator.verify( streamTag );
-      std::cout << "[Demo]: input string ";
-      std::cout << (result ? "contains a" : "does not contain a") << std::endl;
-    } catch (lattice::DishonestEvaluatorException& e ) {
-      std::cout << e.what() << std::endl;
+  for ( size_t i = 0; i < n; ++i ) {
+    for ( size_t j = 0; j < m; ++j ) {
+      for ( size_t byteIndex = 0; byteIndex < msgLength; ++byteIndex ) {
+        auto c = msg[byteIndex];
+        for ( size_t bitIndex = 0; bitIndex < 8; ++bitIndex ) {
+          bool bit = (c >> bitIndex) & 1;
+          size_t encodedBit = bit ? 
+                              lattice::RingMatrix<n,m,deg,k>::MODULUS/2 : 
+                              0;
+          rings.setCoeff( i, j, 8*byteIndex + bitIndex, encodedBit );
+        }
+      }
     }
   }
-};
+}
+
+template< size_t n, size_t m, size_t deg, size_t k >
+std::string decodeString( lattice::RingMatrix<n,m,deg,k>& rings ) {
+  std::stringstream ss;
+
+  size_t quarter = lattice::RingMatrix<n,m,deg,k>::MODULUS/4;
+  for ( size_t i = 0; i < n; ++i ) {
+    for ( size_t j = 0; j < m; ++j ) {
+      for ( size_t byteIndex = 0; byteIndex < deg/8; ++byteIndex ) {
+        char c = 0;
+        for ( size_t bitIndex = 0; bitIndex < 8; ++bitIndex ) {
+          auto coeff = rings.getCoeff( i, j, 8*byteIndex + bitIndex );
+          bool decodedBit = (coeff < quarter || coeff > 3*quarter) ? 0 : 1;
+          c |= (decodedBit << bitIndex);
+        }
+        ss << c;
+      }
+    }
+  }
+
+  return ss.str();
+}
 
 int main() {
-  try {
-    StreamingDelegatorDemo demo( FSM_FILENAME );
-    demo.run();
-  } catch (std::exception& e ) {
-    std::cout << e.what() << std::endl;
-    return EXIT_FAILURE;
+  srand( time( NULL ) );
+
+  double encrypt_time = 0;
+  double decrypt_time = 0;
+  struct timeval t1, t2;
+
+  auto A = lattice::RingMatrix<1,K,DEG,K>{};
+  auto s = lattice::RingMatrix<1,1,DEG,K>{};
+  auto e = lattice::RingMatrix<K,1,DEG,K>{};
+  auto m = lattice::RingMatrix<K,1,DEG,K>{};
+
+
+  A.uniformInit();
+
+  for ( size_t i = 0; i < ITERATIONS; ++i ) {
+    gettimeofday( &t1, 0 );
+    s.uniformInit();
+    e.ternaryInit();
+    encodeString( m, "Hello World, I am 32 characters!" );
+    auto y = A.T()*s + e + m; // error correcting encryption
+    gettimeofday( &t2, 0 );
+    encrypt_time += microsecondsBetween( t1, t2 );
+
+    gettimeofday( &t1, 0 );
+    auto emPrime = y - A.T()*s;
+    auto mPrime = decodeString( emPrime );
+    gettimeofday( &t2, 0 );
+    decrypt_time += microsecondsBetween( t1, t2 );
+
+    if ( i == ITERATIONS - 1 )
+      std::cout << "mPrime: " << mPrime << std::endl;
   }
-  return EXIT_SUCCESS;
+
+  std::cout << "total time: " << encrypt_time + decrypt_time << std::endl;
+  std::cout << "encrypt time: " << (encrypt_time/double(ITERATIONS)) << std::endl;
+  std::cout << "decrypt time: " << (decrypt_time/double(ITERATIONS)) << std::endl;
+
+  return 0;
 }
+
